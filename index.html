@@ -478,9 +478,17 @@
     background: var(--accent-soft); margin-bottom: 8px;
   }
   .shop-drag {
-    flex: 0 0 auto; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-    text-align: center; color: var(--muted); font-size: 20px; margin: -4px 0;
-    cursor: grab; touch-action: none; line-height: 1; user-select: none; -webkit-user-select: none;
+    flex: 0 0 auto; width: 30px; height: 44px; display: flex; align-items: center; justify-content: center;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; margin: -7px 0;
+  }
+  .shop-drag::before {
+    content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--muted);
+    box-shadow:
+      10px 0 0 var(--muted),
+      0 6px 0 var(--muted),
+      10px 6px 0 var(--muted),
+      0 12px 0 var(--muted),
+      10px 12px 0 var(--muted);
   }
   .shop-check {
     width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); flex: 0 0 auto;
@@ -1479,7 +1487,7 @@
       var upDisabled = i === 0 || prevDiffers;
       var downDisabled = i === items.length - 1 || nextDiffers;
       return '<div class="shop-item' + (it.checked ? ' checked' : '') + '" data-id="' + it.id + '" style="--d:' + delay + 's">' +
-        '<span class="shop-drag" aria-hidden="true">⠿</span>' +
+        '<span class="shop-drag" aria-hidden="true"></span>' +
         '<button class="shop-check" onclick="toggleShopItem(\'' + it.id + '\')" aria-label="Erledigt">' +
           (it.checked ? '✓' : '') +
         '</button>' +
