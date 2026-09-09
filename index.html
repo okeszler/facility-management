@@ -396,9 +396,9 @@
   }
   @keyframes steam-rise {
     0%   { transform: translate(var(--sx), 2px) scale(.45); opacity: 0; }
-    18%  { opacity: .39; }
-    55%  { transform: translate(var(--dx), -17px) scale(1); opacity: .25; }
-    85%  { opacity: .08; }
+    18%  { opacity: .20; }
+    55%  { transform: translate(var(--dx), -17px) scale(1); opacity: .13; }
+    85%  { opacity: .04; }
     100% { transform: translate(calc(var(--dx) * -1), -29px) scale(1.6); opacity: 0; }
   }
   .meal-card .meal-icon.roll { animation: meal-icon-roll .85s cubic-bezier(.34,1.56,.64,1); }
@@ -472,6 +472,15 @@
     animation: meal-in .4s var(--bounce) both; animation-delay: var(--d, 0s);
   }
   .shop-item.checked { opacity: .55; }
+  .shop-item.dragging { opacity: .9; box-shadow: 0 10px 26px rgba(0,0,0,.45); cursor: grabbing; }
+  .shop-drag-placeholder {
+    border: 2px dashed var(--accent); border-radius: var(--radius);
+    background: var(--accent-soft); margin-bottom: 8px;
+  }
+  .shop-drag {
+    flex: 0 0 auto; width: 22px; text-align: center; color: var(--muted); font-size: 16px;
+    cursor: grab; touch-action: none; line-height: 1;
+  }
   .shop-check {
     width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); flex: 0 0 auto;
     background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -943,7 +952,7 @@
     var html = '';
     for (var i = 0; i < count; i++) {
       var delay = (i * (STEAM_DURATION / count)).toFixed(2);
-      var sx = (((i % 5) - 2) * 3.12).toFixed(1);
+      var sx = (((i % 5) - 2) * 3.74).toFixed(1);
       var dx = ((((i * 7) % 11) - 5) * 1.1).toFixed(1);
       html += '<span style="animation-delay:' + delay + 's; --sx:' + sx + 'px; --dx:' + dx + 'px;"></span>';
     }
@@ -960,7 +969,7 @@
     var healthDot = showHealth
       ? ' <span class="health-dot health-' + esc(day.dish && day.dish.health || 'yellow') + '" title="Gesundheitsampel"></span>'
       : '';
-    var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(36) + '</div>' : '';
+    var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(72) + '</div>' : '';
     var dishHtml = day.dish
       ? '<div class="meal-icon">' + esc(day.dish.icon) + steamHtml + '</div>' +
         '<div class="meal-info"><div class="meal-name">' + esc(day.dish.name) + healthDot + '</div></div>'
@@ -1468,7 +1477,8 @@
       var nextDiffers = i < items.length - 1 && items[i + 1].checked !== it.checked;
       var upDisabled = i === 0 || prevDiffers;
       var downDisabled = i === items.length - 1 || nextDiffers;
-      return '<div class="shop-item' + (it.checked ? ' checked' : '') + '" style="--d:' + delay + 's">' +
+      return '<div class="shop-item' + (it.checked ? ' checked' : '') + '" data-id="' + it.id + '" style="--d:' + delay + 's">' +
+        '<span class="shop-drag" aria-hidden="true">⠿</span>' +
         '<button class="shop-check" onclick="toggleShopItem(\'' + it.id + '\')" aria-label="Erledigt">' +
           (it.checked ? '✓' : '') +
         '</button>' +
@@ -1565,6 +1575,80 @@
       .catch(function(err) { toast('⚠️ ' + err.message); });
   }
 
+  /* ---------- Einkaufsliste: Drag & Drop ---------- */
+  function initShopDrag() {
+    var host = document.getElementById('shoppingList');
+    host.addEventListener('pointerdown', function(e) {
+      var handle = e.target.closest('.shop-drag');
+      if (!handle) return;
+      var item = handle.closest('.shop-item');
+      if (!item) return;
+      e.preventDefault();
+      startShopDrag(item, e);
+    });
+  }
+
+  function startShopDrag(item, startEvent) {
+    var host = document.getElementById('shoppingList');
+    var others = Array.prototype.slice.call(host.querySelectorAll('.shop-item')).filter(function(el) { return el !== item; });
+    var startY = startEvent.clientY;
+    var rect = item.getBoundingClientRect();
+
+    var placeholder = document.createElement('div');
+    placeholder.className = 'shop-drag-placeholder';
+    placeholder.style.height = rect.height + 'px';
+    item.parentNode.insertBefore(placeholder, item.nextSibling);
+
+    item.classList.add('dragging');
+    item.style.position = 'fixed';
+    item.style.left = rect.left + 'px';
+    item.style.top = rect.top + 'px';
+    item.style.width = rect.width + 'px';
+    item.style.zIndex = 50;
+    item.style.pointerEvents = 'none';
+
+    function onMove(e) {
+      var dy = e.clientY - startY;
+      item.style.top = (rect.top + dy) + 'px';
+      var target = others.filter(function(el) { return el.isConnected; }).find(function(el) {
+        var r = el.getBoundingClientRect();
+        return e.clientY < r.top + r.height / 2;
+      });
+      if (target) host.insertBefore(placeholder, target);
+      else host.appendChild(placeholder);
+    }
+
+    function onUp() {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      document.removeEventListener('pointercancel', onUp);
+      item.classList.remove('dragging');
+      item.style.position = '';
+      item.style.left = '';
+      item.style.top = '';
+      item.style.width = '';
+      item.style.zIndex = '';
+      item.style.pointerEvents = '';
+      placeholder.parentNode.insertBefore(item, placeholder);
+      placeholder.remove();
+
+      var newOrder = Array.prototype.map.call(host.querySelectorAll('.shop-item'), function(el) {
+        return el.getAttribute('data-id');
+      });
+      persistShopOrder(newOrder);
+    }
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  }
+
+  function persistShopOrder(ids) {
+    callApi('/api/shopping-order', { ids: ids })
+      .then(function(d) { SHOPPING = d; renderShoppingList(); })
+      .catch(function(err) { toast('⚠️ ' + err.message); loadShopping(); });
+  }
+
   /* ---------- Ansichts-Umschalter (Putzplan / Speiseplan / Einkauf) ---------- */
   var VIEWS = ['tasks', 'meals', 'shopping'];
   var VIEW_BTN_IDS = { tasks: 'viewTasksBtn', meals: 'viewMealsBtn', shopping: 'viewShoppingBtn' };
@@ -1646,6 +1730,7 @@
   document.getElementById('viewMealsBtn').addEventListener('click', function() { setView('meals'); });
   document.getElementById('viewShoppingBtn').addEventListener('click', function() { setView('shopping'); });
   initSwipe();
+  initShopDrag();
   var healthToggleEl = document.getElementById('healthToggle');
   healthToggleEl.checked = showHealth;
   healthToggleEl.addEventListener('change', function() {
