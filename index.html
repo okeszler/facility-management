@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Facility Management GW5</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#A876E3">
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #170F20;
+    --card: #241832;
+    --ink: #F1ECFA;
+    --muted: #A99BC4;
+    --line: #3A2C4D;
+    --purple: #A876E3;       /* Oliver + Hauptmarkenfarbe */
+    --lavender: #C7A9F0;     /* Andreea */
+    --orange: #F2954A;       /* Florian + Erfolg/Feier */
+    --warn: #E2694A;
+    --accent: var(--purple);
+    --accent-soft: #3B2A54;
+    --good: var(--orange);
+    --warn-soft: #4A2C26;
+    --radius: 16px;
+    --shadow: 0 2px 10px rgba(0,0,0,.35);
+    --bounce: cubic-bezier(.34,1.56,.64,1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.45;
+    padding-bottom: 100px;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, .section-title, .btn, .who-chip, .modal .save {
+    font-family: 'Poppins', 'Nunito', system-ui, sans-serif;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 18px; }
+
+  /* ---------- Kopf ---------- */
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 4px 2px 20px;
+  }
+  .ring { position: relative; width: 76px; height: 76px; flex: 0 0 auto; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring .track { stroke: var(--line); }
+  .ring .bar { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset .8s var(--bounce); }
+  .ring .label {
+    position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-weight: 800; font-size: 16px;
+  }
+  .head-text h1 {
+    font-size: 21px; font-weight: 800; letter-spacing: .01em;
+  }
+  .head-text p { color: var(--muted); font-size: 15px; margin-top: 2px; }
+
+  /* ---------- Nutzer-Auswahl ---------- */
+  .whoami { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+  .who-chip {
+    position: relative;
+    border: 2px solid var(--line); background: var(--card); border-radius: 12px;
+    padding: 9px 16px; font-family: inherit; font-weight: 700; font-size: 15px;
+    color: var(--ink); cursor: pointer; min-height: 44px;
+    transition: transform .3s var(--bounce), background .25s ease, border-color .25s ease;
+  }
+  .who-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .who-chip.pop { animation: chip-pop .45s var(--bounce); }
+  @keyframes chip-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.14); }
+    100% { transform: scale(1); }
+  }
+  .who-badge {
+    display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .03em;
+    text-transform: uppercase; color: var(--muted); margin-top: 2px;
+  }
+  .who-chip.active .who-badge { color: rgba(255,255,255,.9); }
+
+  /* ---------- Abschnitte ---------- */
+  .section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13.5px; font-weight: 800; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+    margin: 26px 2px 12px;
+  }
+  .section-title .count {
+    background: var(--line); border-radius: 8px; padding: 1px 9px;
+    font-size: 12.5px; color: var(--ink); font-weight: 800;
+  }
+  .section-title.overdue { color: var(--warn); }
+  .section-title.overdue .count { background: var(--warn-soft); color: var(--warn); }
+
+  /* ---------- Aufgabenkarten ---------- */
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--line);
+    padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 12px;
+    transition: opacity .5s var(--bounce), transform .5s var(--bounce);
+    animation: card-in .5s var(--bounce) both;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(16px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .card.leaving { opacity: 0; transform: translateX(36px) scale(.92) rotate(2deg); }
+  .card .icon.done-flash {
+    background: var(--good); color: #fff;
+    animation: icon-pop .5s var(--bounce);
+    box-shadow: 0 0 0 8px rgba(232,121,46,.18);
+  }
+  @keyframes icon-pop {
+    0% { transform: scale(1) rotate(0deg); }
+    45% { transform: scale(1.35) rotate(-8deg); }
+    100% { transform: scale(1.12) rotate(0deg); }
+  }
+  .card .icon {
+    width: 48px; height: 48px; border-radius: 12px; flex: 0 0 auto;
+    background: var(--bg); display: flex; align-items: center;
+    justify-content: center; font-size: 24px; font-weight: 800;
+    transition: background .3s ease, transform .3s ease;
+  }
+  .card .icon.done-flash { transform: scale(1.12); }
+  .card .info { flex: 1 1 auto; min-width: 0; }
+  .card .name { font-weight: 700; font-size: 16.5px; line-height: 1.3; }
+  .card .meta {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-top: 5px; font-size: 12.5px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .03em; font-weight: 700;
+  }
+  .overdue-tag { color: var(--warn); font-weight: 800; }
+  .card .actions { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; }
+  .btn {
+    border: none; border-radius: 10px; padding: 10px 14px;
+    font-family: inherit; font-weight: 800; font-size: 14px; cursor: pointer;
+    min-width: 96px; min-height: 40px;
+  }
+  .btn.done { background: var(--good); color: #fff; }
+  .btn.later { background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
+  .btn.skip { background: var(--card); color: var(--warn); border: 1px solid var(--warn-soft); }
+  .btn.retro {
+    background: none; border: none; color: var(--muted); font-size: 12px;
+    font-weight: 700; padding: 3px 2px 0; min-width: auto; min-height: auto; text-decoration: underline;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.early {
+    background: var(--card); color: var(--accent); border: 2px solid var(--accent);
+    padding: 8px 12px; font-size: 13px; min-width: auto;
+  }
+
+  /* ---------- Demnächst ---------- */
+  .upcoming .card { opacity: .8; }
+  .upcoming .due-info { font-size: 12.5px; color: var(--muted); font-weight: 800; flex: 0 0 auto; text-align: right; text-transform: uppercase; }
+
+  .empty {
+    text-align: center; padding: 38px 16px; color: var(--muted);
+    background: var(--card); border-radius: var(--radius); border: 1px solid var(--line);
+  }
+  .empty .big { font-size: 40px; margin-bottom: 10px; }
+
+  /* ---------- Streak ---------- */
+  .streak {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 13px; font-weight: 800; color: var(--accent);
+    text-transform: uppercase; letter-spacing: .03em;
+    margin-top: 4px;
+  }
+
+  /* ---------- 1x-Aufgabe ---------- */
+  .top-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .oneoff-btn {
+    flex: 0 0 auto; height: 48px; padding: 0 18px; border-radius: 12px;
+    background: var(--card); cursor: pointer;
+    font-family: inherit; font-weight: 800; font-size: 14px; color: var(--accent);
+    border: 2px solid var(--accent);
+  }
+
+  /* ---------- Konfetti (nur bei echtem Tagesabschluss) ---------- */
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+  .confetti-piece {
+    position: absolute; top: -16px; width: 13px; height: 19px; opacity: 1;
+    border-radius: 3px;
+    animation: confetti-fall 1.8s cubic-bezier(.25,.46,.45,.94) forwards;
+  }
+  @keyframes confetti-fall {
+    to { transform: translateY(115vh) rotate(540deg); opacity: .3; }
+  }
+
+  /* ---------- Hinzufügen ---------- */
+  .fab {
+    position: fixed; right: 18px; bottom: 18px; z-index: 20;
+    width: 60px; height: 60px; border-radius: 50%; border: none;
+    background: var(--accent); color: #fff; font-size: 30px; line-height: 1;
+    box-shadow: 0 6px 16px rgba(108,63,166,.35); cursor: pointer;
+  }
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(36,26,51,.5);
+    display: none; align-items: flex-end; justify-content: center; z-index: 30;
+  }
+  .modal-back.open { display: flex; }
+  .modal {
+    background: var(--card); width: 100%; max-width: 640px;
+    border-radius: 20px 20px 0 0; padding: 22px 20px 28px;
+    animation: modal-up .4s var(--bounce);
+  }
+  @keyframes modal-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal h2 { font-size: 19px; font-weight: 800; margin-bottom: 16px; }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 12.5px; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%; border: 2px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; font-family: inherit; font-size: 16px; background: var(--card); color: var(--ink);
+    min-height: 46px;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .icon-pick { display: flex; gap: 7px; flex-wrap: wrap; }
+  .icon-pick button {
+    width: 44px; height: 44px; border-radius: 10px; border: 2px solid var(--line);
+    background: var(--card); font-size: 20px; cursor: pointer;
+  }
+  .icon-pick button.sel { border-color: var(--accent); background: var(--accent-soft); }
+  .modal .save {
+    width: 100%; margin-top: 8px; padding: 15px; border: none; border-radius: 12px;
+    background: var(--accent); color: #fff; font-family: inherit;
+    font-weight: 800; font-size: 16px; cursor: pointer; min-height: 50px;
+  }
+  .modal .cancel {
+    width: 100%; margin-top: 8px; padding: 12px; border: none; background: none;
+    color: var(--muted); font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+  }
+
+  /* ---------- Laden / Toast ---------- */
+  #loading { text-align: center; padding: 60px 0; color: var(--muted); font-weight: 700; }
+  .spin {
+    width: 34px; height: 34px; margin: 0 auto 12px; border-radius: 50%;
+    border: 4px solid var(--line); border-top-color: var(--accent);
+    animation: sp 1s linear infinite;
+  }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  #toast {
+    position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(6px);
+    background: #12081C; color: #FFFFFF; padding: 14px 22px; border-radius: 12px;
+    font-weight: 700; font-size: 16.5px; opacity: 0; pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease; z-index: 40;
+    max-width: 88vw; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.4);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Botschaften-Banner (dauerhaft, bis manuell geschlossen) ---------- */
+  .message-banner {
+    position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(12px) scale(.96);
+    width: min(92vw, 420px); background: #12081C; color: #FFFFFF;
+    border-radius: 18px; padding: 20px 22px 18px; z-index: 41;
+    box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s var(--bounce), transform .35s var(--bounce);
+  }
+  .message-banner.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); pointer-events: auto; }
+  .message-banner-text {
+    font-size: 18px; font-weight: 700; line-height: 1.5; text-align: center; margin-bottom: 14px;
+  }
+  .message-banner-btn {
+    display: block; width: 100%; border: none; border-radius: 12px;
+    background: var(--accent); color: #fff; font-family: inherit;
+    font-weight: 800; font-size: 15px; padding: 12px; cursor: pointer;
+  }
+  .message-banner-btn:active { transform: scale(.97); }
+
+  /* ---------- Wochenrückblick ---------- */
+  .recap-banner {
+    background: var(--accent); color: #fff; border-radius: var(--radius);
+    padding: 18px; margin-bottom: 18px;
+  }
+  .recap-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: .04em;
+    margin-bottom: 10px;
+  }
+  .recap-close {
+    background: rgba(255,255,255,.22); border: none; color: #fff;
+    width: 26px; height: 26px; border-radius: 8px; cursor: pointer; font-size: 13px;
+  }
+  .recap-msg { font-size: 15px; line-height: 1.45; margin-bottom: 12px; }
+  .recap-row {
+    display: flex; justify-content: space-between; font-size: 14px;
+    padding: 6px 0; border-top: 1px solid rgba(255,255,255,.22);
+  }
+  .recap-row.top { font-weight: 800; }
+
+  /* ---------- Ansichts-Umschalter (Putzplan / Speiseplan / Einkauf) ---------- */
+  .view-switch {
+    display: flex; gap: 6px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 5px; margin-bottom: 20px;
+  }
+  .view-btn {
+    flex: 1 1 0; border: none; background: none; color: var(--muted);
+    font-family: inherit; font-weight: 800; font-size: 13px; padding: 11px 6px;
+    border-radius: 10px; cursor: pointer; min-height: 44px;
+    transition: background .25s ease, color .25s ease;
+  }
+  .view-btn.active { background: var(--accent); color: #fff; }
+  .view-port { overflow: hidden; }
+  .view-track { display: flex; width: 300%; transition: transform .38s var(--bounce); }
+  .view-page { width: 33.3334%; flex: 0 0 33.3334%; min-width: 0; padding: 0 4px; }
+  .view-page:first-child { padding-left: 0; }
+  .view-page:last-child { padding-right: 0; }
+
+  /* ---------- Speiseplan ---------- */
+  .meal-add-row { display: flex; align-items: center; justify-content: space-between; margin: -6px 2px 4px; }
+  .meal-add-link {
+    background: none; border: none; color: var(--accent); font-family: inherit;
+    font-weight: 800; font-size: 13.5px; cursor: pointer; padding: 4px 2px;
+  }
+  .toggle-row {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);
+    font-weight: 700; cursor: pointer; user-select: none;
+  }
+  .toggle-switch { position: relative; width: 38px; height: 22px; flex: 0 0 auto; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-slider {
+    position: absolute; inset: 0; background: var(--line); border-radius: 22px;
+    transition: background .25s ease;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: transform .25s var(--bounce);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+  .meal-card {
+    background: var(--card); border-radius: var(--radius); border: 1px solid var(--line);
+    padding: 12px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+    animation: meal-in .5s var(--bounce) both; animation-delay: var(--d, 0s);
+  }
+  @keyframes meal-in {
+    from { opacity: 0; transform: translateY(14px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .meal-card.today {
+    border-color: var(--accent); background: var(--accent-soft);
+    padding: 22px 16px; min-height: 130px;
+  }
+  .meal-card.today .meal-day { font-size: 16px; font-weight: 900; min-width: 56px; }
+  .meal-card.today .meal-icon { width: 66px; height: 66px; font-size: 33px; border-radius: 16px; }
+  .meal-card.today .meal-name { font-size: 19.5px; }
+  .meal-card.today .steam { transform: scale(1.35); }
+  .meal-card.swap-flash { animation: meal-swap .5s var(--bounce); }
+  @keyframes meal-swap {
+    0% { transform: scale(1); border-color: var(--line); }
+    40% { transform: scale(1.03); border-color: var(--accent); background: var(--accent-soft); }
+    100% { transform: scale(1); border-color: var(--line); }
+  }
+  .meal-card.today.swap-flash { animation-name: meal-swap-today; }
+  @keyframes meal-swap-today {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.03); background: var(--accent-soft); }
+    100% { transform: scale(1); }
+  }
+  .meal-dish {
+    display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0;
+  }
+  .meal-dish.sliding { position: relative; z-index: 5; }
+  .meal-card .meal-day {
+    min-width: 44px; flex: 0 0 auto; text-align: center; font-weight: 800; font-size: 12.5px;
+    color: var(--muted); text-transform: uppercase; line-height: 1.3; white-space: nowrap;
+  }
+  .meal-card.today .meal-day { color: var(--accent); }
+  .meal-card .meal-day .num { display: block; font-size: 15px; color: var(--ink); }
+  .meal-card .meal-icon {
+    width: 42px; height: 42px; border-radius: 12px; flex: 0 0 auto; position: relative;
+    background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 21px;
+  }
+  .steam { position: absolute; top: 50%; left: 50%; width: 0; height: 0; pointer-events: none; }
+  .steam span {
+    position: absolute; bottom: 0; left: 50%; margin-left: -3.5px; width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(241,236,250,.55); opacity: 0;
+    animation: steam-rise 9.6s ease-in-out infinite;
+  }
+  @keyframes steam-rise {
+    0%   { transform: translate(var(--sx), 2px) scale(.45); opacity: 0; }
+    18%  { opacity: .39; }
+    55%  { transform: translate(var(--dx), -17px) scale(1); opacity: .25; }
+    85%  { opacity: .08; }
+    100% { transform: translate(calc(var(--dx) * -1), -29px) scale(1.6); opacity: 0; }
+  }
+  .meal-card .meal-icon.roll { animation: meal-icon-roll .85s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes meal-icon-roll {
+    0%   { transform: rotate(0deg) scale(1); box-shadow: 0 0 0 0 rgba(168,118,227,0); }
+    12%  { transform: rotate(-30deg) scale(1.25); box-shadow: 0 0 0 7px rgba(168,118,227,.32); }
+    28%  { transform: rotate(26deg) scale(1.3); }
+    44%  { transform: rotate(-20deg) scale(1.22); }
+    60%  { transform: rotate(14deg) scale(1.15); box-shadow: 0 0 0 4px rgba(168,118,227,.18); }
+    76%  { transform: rotate(-8deg) scale(1.08); }
+    90%  { transform: rotate(4deg) scale(1.03); }
+    100% { transform: rotate(0deg) scale(1); box-shadow: 0 0 0 0 rgba(168,118,227,0); }
+  }
+  .meal-card .meal-info { flex: 1 1 auto; min-width: 0; }
+  .meal-card .meal-name { font-weight: 700; font-size: 15px; overflow-wrap: break-word; word-break: break-word; }
+  .meal-card .meal-name.meal-empty { color: var(--muted); font-style: italic; font-weight: 600; }
+  .meal-card .meal-actions { display: flex; gap: 6px; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; max-width: 132px; }
+  @media (max-width: 480px) {
+    .meal-card { flex-wrap: wrap; row-gap: 10px; }
+    .meal-card .meal-actions { flex: 1 1 100%; max-width: none; }
+  }
+  .meal-icon-btn {
+    width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); font-size: 16px; cursor: pointer;
+  }
+  .meal-icon-btn:active { transform: scale(.94); }
+  .meal-icon-btn.narrow { width: 19px; font-size: 13px; padding: 0; }
+
+  /* ---------- Gerichte verwalten ---------- */
+  .dish-manage-list { margin-top: 16px; max-height: 260px; overflow-y: auto; }
+  .dish-manage-row {
+    display: flex; align-items: center; gap: 8px; padding: 9px 2px;
+    border-top: 1px solid var(--line); flex-wrap: wrap;
+  }
+  .dish-manage-row:first-child { border-top: none; }
+  .dish-manage-row .dm-icon { font-size: 19px; width: 22px; text-align: center; flex: 0 0 auto; }
+  .dish-manage-row .dm-name {
+    flex: 1 1 auto; font-weight: 700; font-size: 14.5px; min-width: 60px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .dish-manage-row .dm-actions { display: flex; gap: 4px; flex: 0 0 auto; }
+  .dm-btn {
+    width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); font-size: 13px; cursor: pointer; padding: 0;
+  }
+  .dm-btn:disabled { opacity: .3; cursor: default; }
+  .dm-btn.danger { background: var(--warn-soft); color: #fff; border-color: var(--warn); }
+
+  /* ---------- Einkaufsliste ---------- */
+  .shop-add-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .shop-add-row input {
+    flex: 1 1 auto; border: 2px solid var(--line); border-radius: 10px; padding: 11px 14px;
+    font-family: inherit; font-size: 16px; background: var(--card); color: var(--ink); min-height: 46px;
+  }
+  .shop-add-row input:focus { outline: none; border-color: var(--accent); }
+  .shop-add-row button {
+    flex: 0 0 auto; width: 46px; height: 46px; border-radius: 10px; border: none;
+    background: var(--accent); color: #fff; font-size: 22px; font-weight: 800; cursor: pointer; line-height: 1;
+  }
+  .shop-add-row button.cancel-edit { background: var(--card); color: var(--muted); border: 1px solid var(--line); font-size: 18px; }
+  .shop-tag-picker { display: flex; gap: 8px; margin: 0 0 14px; }
+  .shop-tag-toggle {
+    border: 2px solid var(--line); background: var(--card); color: var(--muted);
+    font-family: inherit; font-weight: 800; font-size: 12.5px; padding: 7px 12px;
+    border-radius: 20px; cursor: pointer;
+  }
+  .shop-tag-toggle.sel { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .shop-item {
+    background: var(--card); border-radius: var(--radius); border: 1px solid var(--line);
+    padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;
+    animation: meal-in .4s var(--bounce) both; animation-delay: var(--d, 0s);
+  }
+  .shop-item.checked { opacity: .55; }
+  .shop-check {
+    width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); flex: 0 0 auto;
+    background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; padding: 0;
+  }
+  .shop-item.checked .shop-check { background: var(--good); border-color: var(--good); }
+  .shop-name {
+    flex: 1 1 auto; min-width: 60px; font-weight: 700; font-size: 15px;
+    overflow-wrap: break-word; word-break: break-word;
+  }
+  .shop-item.checked .shop-name { color: var(--muted); }
+  .shop-tag {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; font-size: 11px; margin-left: 5px;
+    border-radius: 50%; vertical-align: middle;
+  }
+  .shop-tag.aktion { background: var(--warn-soft); }
+  .shop-tag.drogerie { background: rgba(155,127,217,.25); }
+  .shop-tag.tk { background: rgba(56,138,221,.22); }
+  .dm-actions { display: flex; gap: 4px; flex: 0 0 auto; }
+
+  /* ---------- Ampel (Gesundheit der Mahlzeit) ---------- */
+  .health-dot {
+    display: inline-block; width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto;
+    border: 1px solid rgba(0,0,0,.25);
+  }
+  .health-dot.health-red { background: #E2694A; }
+  .health-dot.health-yellow { background: #E3B23C; }
+  .health-dot.health-green { background: #55B27C; }
+  .health-pick { display: flex; gap: 10px; }
+  .health-pick button {
+    width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; padding: 0;
+  }
+  .health-pick button.sel { border-color: var(--ink); }
+  .health-pick button[data-h="red"] { background: #E2694A; }
+  .health-pick button[data-h="yellow"] { background: #E3B23C; }
+  .health-pick button[data-h="green"] { background: #55B27C; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="loading"><div class="spin"></div>Facility Management GW5 wird geladen …</div>
+  <div id="app" style="display:none">
+    <div class="recap-banner" id="recapBanner" style="display:none"></div>
+    <header>
+      <div class="ring">
+        <svg width="72" height="72" viewBox="0 0 72 72">
+          <circle class="track" cx="36" cy="36" r="31" fill="none" stroke-width="7"/>
+          <circle class="bar" id="ringBar" cx="36" cy="36" r="31" fill="none" stroke-width="7"/>
+        </svg>
+        <div class="label" id="ringLabel">0%</div>
+      </div>
+      <div class="head-text">
+        <h1>Facility Management GW5 🧺</h1>
+        <p id="subline"></p>
+        <div class="streak" id="streakLine" style="display:none">🔥 <span id="streakNum"></span>-Tage-Streak</div>
+      </div>
+    </header>
+
+    <div class="whoami" id="whoami"></div>
+
+    <div class="view-switch" id="viewSwitch">
+      <button class="view-btn active" id="viewTasksBtn">🧹 Putzplan</button>
+      <button class="view-btn" id="viewMealsBtn">🍽️ Speiseplan</button>
+      <button class="view-btn" id="viewShoppingBtn">🛒 Einkauf</button>
+    </div>
+
+    <div class="view-port" id="viewPort">
+      <div class="view-track" id="viewTrack">
+        <div class="view-page">
+          <div class="top-row">
+            <button class="oneoff-btn" id="addOneOffBtn">1× Einmalige Aufgabe</button>
+          </div>
+          <div id="sections"></div>
+        </div>
+        <div class="view-page">
+          <div class="section-title">🍽️ Speiseplan <span class="count">7 Tage</span></div>
+          <div class="meal-add-row">
+            <label class="toggle-row" for="healthToggle">
+              <span class="toggle-switch"><input type="checkbox" id="healthToggle" checked><span class="toggle-slider"></span></span>
+              Gesundheitsampel anzeigen
+            </label>
+            <button class="meal-add-link" id="addDishBtn">Gerichte verwalten</button>
+          </div>
+          <div id="mealPlan"></div>
+        </div>
+        <div class="view-page">
+          <div class="section-title">🛒 Einkaufsliste <span class="count" id="shopCount">0</span></div>
+          <div class="shop-add-row">
+            <input type="text" id="shopInput" placeholder="z. B. 2x Zwiebeln" maxlength="80">
+            <button id="shopAddBtn" aria-label="Hinzufügen">+</button>
+            <button class="cancel-edit" id="shopCancelEditBtn" aria-label="Bearbeiten abbrechen" hidden>✕</button>
+          </div>
+          <div class="shop-tag-picker">
+            <button type="button" class="shop-tag-toggle" id="tagAktionBtn">🏷️ Aktion</button>
+            <button type="button" class="shop-tag-toggle" id="tagTkBtn">❄️ TK</button>
+            <button type="button" class="shop-tag-toggle" id="tagDrogerieBtn">🧴 Drogerie</button>
+          </div>
+          <div id="shoppingList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="fab" id="fabAdd" aria-label="Aufgabe hinzufügen">+</button>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal">
+    <h2>Neue Aufgabe ✨</h2>
+    <div class="field">
+      <label for="fName">Was ist zu tun?</label>
+      <input id="fName" type="text" placeholder="z. B. Terrasse kehren" maxlength="80">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="fCat">Kategorie</label>
+        <select id="fCat"></select>
+      </div>
+      <div class="field">
+        <label for="fInt">Intervall (Tage)</label>
+        <input id="fInt" type="number" min="1" max="365" value="7" inputmode="numeric">
+      </div>
+    </div>
+    <div class="field">
+      <label>Icon</label>
+      <div class="icon-pick" id="iconPick"></div>
+    </div>
+    <button class="save" id="btnSave">Aufgabe speichern</button>
+    <button class="cancel" id="btnCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="modal-back" id="oneoffModalBack">
+  <div class="modal">
+    <h2>Einmalige Aufgabe ⚡1x</h2>
+    <div class="field">
+      <label for="ooName">Was ist zu tun?</label>
+      <input id="ooName" type="text" placeholder="z. B. Sperrmüll anmelden" maxlength="80">
+    </div>
+    <button class="save" id="ooSave">Aufgabe speichern</button>
+    <button class="cancel" id="ooCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="modal-back" id="retroModalBack">
+  <div class="modal">
+    <h2 id="retroTitle">Rückwirkend erledigt 🕓</h2>
+    <div class="field">
+      <label for="retroDate">Wann wurde es tatsächlich erledigt?</label>
+      <input id="retroDate" type="date">
+    </div>
+    <button class="save" id="retroSave">Als erledigt markieren</button>
+    <button class="cancel" id="retroCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="modal-back" id="mealPickModalBack">
+  <div class="modal">
+    <h2 id="mealPickTitle">Gericht wählen 🍽️</h2>
+    <div class="field">
+      <label for="mealPickSelect">Gericht</label>
+      <select id="mealPickSelect"></select>
+    </div>
+    <button class="save" id="mealPickSave">Übernehmen</button>
+    <button class="cancel" id="mealPickCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="modal-back" id="dishModalBack">
+  <div class="modal">
+    <h2>Gerichte verwalten 🍲</h2>
+    <div class="field">
+      <label for="dishName">Was gibt's?</label>
+      <input id="dishName" type="text" placeholder="z. B. Linsensuppe" maxlength="60">
+    </div>
+    <div class="field">
+      <label>Icon</label>
+      <div class="icon-pick" id="dishIconPick"></div>
+    </div>
+    <div class="field">
+      <label>Gesundheitsampel (wie gesund ist das Gericht?)</label>
+      <div class="health-pick" id="dishHealthPick">
+        <button type="button" data-h="green" title="Grün – gesund" onclick="pickDishHealth('green')"></button>
+        <button type="button" data-h="yellow" title="Gelb – okay" onclick="pickDishHealth('yellow')"></button>
+        <button type="button" data-h="red" title="Rot – Ausnahme" onclick="pickDishHealth('red')"></button>
+      </div>
+    </div>
+    <button class="save" id="dishSave">Gericht speichern</button>
+    <div class="dish-manage-list" id="dishManageList"></div>
+    <button class="cancel" id="dishCancel">Schließen</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div class="message-banner" id="messageBanner">
+  <div class="message-banner-text" id="messageBannerText"></div>
+  <button class="message-banner-btn" id="messageBannerBtn">💐 Danke für die Blumen</button>
+</div>
+<div id="confetti"></div>
+
+<script>
+  var DATA = { tasks: [], members: [], today: '' };
+
+  /* ---------- API-Helper (ersetzt google.script.run) ---------- */
+  function callApi(path, body) {
+    var opts = body
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+      : { method: 'GET' };
+    return fetch(path, opts).then(function(r) {
+      return r.json().catch(function() { return {}; }).then(function(data) {
+        if (!r.ok) throw new Error((data && data.error) || ('Serverfehler (' + r.status + ')'));
+        return data;
+      });
+    });
+  }
+  var currentUser = null;
+  var busy = {};
+  var ICONS = ['🧹','🧽','🧺','🍽️','🚽','🛁','🪞','🌀','🪶','🪟','🧸','👕','🛏️','🗑️','♻️','🌿','🔥','🧊'];
+  var pickedIcon = '🧹';
+  var CIRC = 2 * Math.PI * 31;
+  var prevOpen = null;
+  var suppressNextConfetti = false;
+  var RESPECT_THRESHOLDS = [3, 5, 8, 12];
+
+  var MEALS = { today: '', days: [], dishes: [] };
+  var showHealth = true;
+  try { var savedShowHealth = localStorage.getItem('pp_show_health'); if (savedShowHealth !== null) showHealth = savedShowHealth === '1'; } catch (e) {}
+  var FOOD_ICONS = ['🍽️','🍝','🍕','🍔','🍛','🍲','🍚','🐟','🍖','🥗','🍜','🥔','🍳','🫘','🥩','🍗','🥪','🍞','🧀','🐔','🔥','❄️'];
+  var pickedDishIcon = '🍽️';
+  var pickedDishHealth = 'yellow';
+  var mealPickDate = null;
+  var editingDishId = null;
+  var currentView = 'tasks';
+  var SHOPPING = { items: [] };
+
+  var FUNNY_DONE = [
+    '{name} geputzt. Die Welt ist wieder ein Stück besser. 🌍✨',
+    'Erledigt! Marie Kondo wäre stolz. ✨',
+    'Boom. {name} war gestern. 💥',
+    'Sauber! Nächster Halt: Weltfrieden. 🕊️',
+    'Erledigt – wie ein Profi. 🧹👑'
+  ];
+  var FUNNY_EARLY = [
+    'Vorgezogen erledigt! Wer braucht schon Fristen. ⏩',
+    '{name} schon jetzt fertig – Bonuspunkte gesichert! 🌟',
+    'Der Kalender ist beeindruckt. ⏩✨'
+  ];
+
+  function pickDoneMessage(taskName, early) {
+    var pool = early ? FUNNY_EARLY : FUNNY_DONE;
+    var useFunny = Math.random() < 0.4;
+    var text = useFunny ? pool[Math.floor(Math.random() * pool.length)]
+      : (early ? '⏩ Vorgezogen erledigt!' : '✓ Erledigt – stark!');
+    return text.replace('{name}', taskName);
+  }
+
+  function weekBadge(count) {
+    if (count >= 20) return '🏆 Legende';
+    if (count >= 12) return '🥷 Putz-Ninja';
+    if (count >= 6) return '😈 Putzteufel';
+    if (count >= 3) return '🐝 Fleißig';
+    return '';
+  }
+
+  function confettiBurst() {
+    var host = document.getElementById('confetti');
+    var colors = ['#6C3FA6', '#9B7FD9', '#E8792E', '#F0C9A0'];
+    for (var i = 0; i < 24; i++) {
+      var p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = (Math.random() * 100) + 'vw';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = (Math.random() * 0.3) + 's';
+      p.style.animationDuration = (1.1 + Math.random() * 0.6) + 's';
+      host.appendChild(p);
+      (function(el) { setTimeout(function() { el.remove(); }, 2200); })(p);
+    }
+  }
+
+  /* ---------- Datum-Helfer (Kalendertage) ---------- */
+  function dayDiff(dueStr, todayStr) {
+    var a = dueStr.split('-'), b = todayStr.split('-');
+    var d1 = Date.UTC(+a[0], +a[1]-1, +a[2]);
+    var d2 = Date.UTC(+b[0], +b[1]-1, +b[2]);
+    return Math.round((d1 - d2) / 86400000);
+  }
+  function niceDate(str) {
+    var p = str.split('-');
+    return p[2] + '.' + p[1] + '.';
+  }
+  function weekday(str) {
+    var p = str.split('-');
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()];
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ---------- Rendering ---------- */
+  function taskCard(t, mode, delay) {
+    var diff = dayDiff(t.due, DATA.today);
+    var overdueTag = diff < 0
+      ? '<span class="overdue-tag">' + (diff === -1 ? '1 Tag' : (-diff) + ' Tage') + ' überfällig</span>' : '';
+    var oneOffTag = t.oneOff ? '<span>· einmalig</span>' : '';
+    var right;
+    if (mode === 'upcoming') {
+      right = '<div class="actions">' +
+        '<div class="due-info">' + weekday(t.due) + ' ' + niceDate(t.due) + '</div>' +
+        '<button class="btn early" onclick="doAction(\'' + t.id + '\',\'complete\',true)">⏩ Jetzt erledigen</button>' +
+        '</div>';
+    } else {
+      right = '<div class="actions">' +
+        '<button class="btn done" onclick="doAction(\'' + t.id + '\',\'complete\',false)">✓ Erledigt</button>' +
+        '<button class="btn later" onclick="doAction(\'' + t.id + '\',\'postpone\')">→ Morgen</button>' +
+        '<button class="btn skip" onclick="doAction(\'' + t.id + '\',\'skip\')">⏭ Überspringen</button>' +
+        '<button class="btn retro" onclick="openRetroModal(\'' + t.id + '\')">🕓 Rückwirkend erledigt</button>' +
+        '</div>';
+    }
+    return '<div class="card" id="card-' + t.id + '" style="--d:' + (delay || 0) + 's">' +
+      '<div class="icon">' + esc(t.icon) + '</div>' +
+      '<div class="info">' +
+        '<div class="name">' + esc(t.name) + '</div>' +
+        '<div class="meta"><span>' + esc(t.category) + '</span>' + oneOffTag + overdueTag + '</div>' +
+      '</div>' + right + '</div>';
+  }
+
+  function render() {
+    var overdue = [], today = [], upcoming = [];
+    DATA.tasks.forEach(function(t) {
+      var d = dayDiff(t.due, DATA.today);
+      if (d < 0) overdue.push(t);
+      else if (d === 0) today.push(t);
+      else if (d <= 7) upcoming.push(t);
+    });
+    overdue.sort(function(a,b){ return a.due < b.due ? -1 : 1; });
+    upcoming.sort(function(a,b){ return a.due < b.due ? -1 : 1; });
+
+    var cardIndex = 0;
+    function nextDelay() {
+      var d = Math.min(cardIndex, 8) * 0.055;
+      cardIndex++;
+      return d;
+    }
+
+    var html = '';
+    if (overdue.length) {
+      html += '<div class="section-title overdue">⏰ Überfällig <span class="count">' + overdue.length + '</span></div>';
+      overdue.forEach(function(t){ html += taskCard(t, 'due', nextDelay()); });
+    }
+    html += '<div class="section-title">📌 Heute <span class="count">' + today.length + '</span></div>';
+    if (today.length) {
+      today.forEach(function(t){ html += taskCard(t, 'due', nextDelay()); });
+    } else if (!overdue.length) {
+      html += '<div class="empty"><div class="big">🎉</div>Alles erledigt – heute ist nichts mehr offen!</div>';
+    } else {
+      html += '<div class="empty"><div class="big">👍</div>Für heute ist nichts Neues geplant.</div>';
+    }
+    if (upcoming.length) {
+      html += '<div class="upcoming"><div class="section-title">🗓️ Nächste 7 Tage <span class="count">' + upcoming.length + '</span></div>';
+      upcoming.forEach(function(t){ html += taskCard(t, 'upcoming', nextDelay()); });
+      html += '</div>';
+    }
+    document.getElementById('sections').innerHTML = html;
+
+    // Fortschrittsring: erledigt = ursprünglich heute fällig minus noch offen
+    var open = overdue.length + today.length;
+    var total = Math.max(open, Number(sessionStorage.getItem('pp_total') || 0));
+    if (open > total) total = open;
+    sessionStorage.setItem('pp_total', total);
+    var doneCount = total - open;
+    var pct = total === 0 ? 100 : Math.round(doneCount / total * 100);
+    var bar = document.getElementById('ringBar');
+    bar.setAttribute('stroke-dasharray', CIRC);
+    bar.setAttribute('stroke-dashoffset', CIRC * (1 - pct / 100));
+    document.getElementById('ringLabel').textContent = pct + '%';
+    document.getElementById('subline').textContent =
+      open === 0 ? 'Alles sauber ✨' : open + (open === 1 ? ' Aufgabe offen' : ' Aufgaben offen');
+
+    var streak = (DATA.stats && DATA.stats.streak) || 0;
+    var streakEl = document.getElementById('streakLine');
+    if (streak >= 2) {
+      streakEl.style.display = 'inline-flex';
+      document.getElementById('streakNum').textContent = streak;
+    } else {
+      streakEl.style.display = 'none';
+    }
+
+    if (prevOpen !== null && prevOpen > 0 && open === 0 && !suppressNextConfetti) confettiBurst();
+    suppressNextConfetti = false;
+    prevOpen = open;
+
+    renderWho();
+    renderWeeklyRecap();
+  }
+
+  /* ---------- Wöchentlicher Sonntags-Rückblick ---------- */
+  var TEAM_LINES = [
+    '🌟 Gemeinsam alles im Griff – diese Woche {n} Aufgaben geschafft! 💪',
+    '🏡 Als Team richtig was bewegt: {n} Aufgaben diese Woche erledigt. Stark!',
+    '✨ {n} Aufgaben, ein Team. Gut gemacht, alle miteinander!',
+    '💜 Diese Woche zusammen {n} Aufgaben geschafft – so hält man ein Zuhause am Laufen.'
+  ];
+
+  function renderWeeklyRecap() {
+    var el = document.getElementById('recapBanner');
+    var p = DATA.today.split('-');
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    var isSunday = d.getDay() === 0;
+    var dismissed = sessionStorage.getItem('pp_recap_dismissed') === DATA.today;
+    var weekCounts = (DATA.stats && DATA.stats.weekCounts) || {};
+
+    var total = 0;
+    var entries = DATA.members.map(function(m) {
+      var c = weekCounts[m.name] || 0;
+      total += c;
+      return { name: m.name, count: c };
+    });
+
+    if (!isSunday || dismissed || total === 0) {
+      el.style.display = 'none';
+      return;
+    }
+
+    var template = TEAM_LINES[Math.floor(Math.random() * TEAM_LINES.length)];
+    var msg = template.replace('{n}', total);
+
+    var rows = entries.map(function(e) {
+      return '<div class="recap-row"><span>' + esc(e.name) + '</span><span>' + e.count + '</span></div>';
+    }).join('');
+
+    el.innerHTML =
+      '<div class="recap-head">🌟 Wochenrückblick<button class="recap-close" onclick="dismissRecap()">✕</button></div>' +
+      '<div class="recap-msg">' + esc(msg) + '</div>' + rows;
+    el.style.display = 'block';
+  }
+
+  function dismissRecap() {
+    sessionStorage.setItem('pp_recap_dismissed', DATA.today);
+    document.getElementById('recapBanner').style.display = 'none';
+  }
+
+  function renderWho() {
+    var el = document.getElementById('whoami');
+    var html = '';
+    var weekCounts = (DATA.stats && DATA.stats.weekCounts) || {};
+    DATA.members.forEach(function(m) {
+      var act = currentUser === m.name;
+      var badge = weekBadge(weekCounts[m.name] || 0);
+      html += '<button class="who-chip' + (act ? ' active' : '') + '"' +
+        (act ? ' style="background:' + m.color + '"' : '') +
+        ' onclick="setUser(\'' + esc(m.name) + '\')">' + esc(m.emoji) + ' ' + esc(m.name) +
+        (badge ? '<span class="who-badge">' + badge + '</span>' : '') +
+        '</button>';
+    });
+    el.innerHTML = html;
+  }
+
+  /* ---------- Speiseplan ---------- */
+  var STEAM_DURATION = 9.6;
+  function steamSpansHtml(count) {
+    var html = '';
+    for (var i = 0; i < count; i++) {
+      var delay = (i * (STEAM_DURATION / count)).toFixed(2);
+      var sx = (((i % 5) - 2) * 3.12).toFixed(1);
+      var dx = ((((i * 7) % 11) - 5) * 1.1).toFixed(1);
+      html += '<span style="animation-delay:' + delay + 's; --sx:' + sx + 'px; --dx:' + dx + 'px;"></span>';
+    }
+    return html;
+  }
+
+  function loadMeals() {
+    return callApi('/api/meals').then(function(d) { MEALS = d; renderMeals(); });
+  }
+
+  function mealCardInnerHTML(day, i, total) {
+    var isToday = day.date === MEALS.today;
+    var isTomorrow = day.date === addDaysClient_(MEALS.today, 1);
+    var healthDot = showHealth
+      ? ' <span class="health-dot health-' + esc(day.dish && day.dish.health || 'yellow') + '" title="Gesundheitsampel"></span>'
+      : '';
+    var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(36) + '</div>' : '';
+    var dishHtml = day.dish
+      ? '<div class="meal-icon">' + esc(day.dish.icon) + steamHtml + '</div>' +
+        '<div class="meal-info"><div class="meal-name">' + esc(day.dish.name) + healthDot + '</div></div>'
+      : '<div class="meal-icon">❔</div>' +
+        '<div class="meal-info"><div class="meal-name meal-empty">Noch kein Gericht</div></div>';
+    var upBtn = i > 0
+      ? '<button class="meal-icon-btn narrow" title="Mit Vortag tauschen" onclick="moveMeal(\'' + day.date + '\',\'up\')">▲</button>'
+      : '';
+    var downBtn = i < total - 1
+      ? '<button class="meal-icon-btn narrow" title="Mit Folgetag tauschen" onclick="moveMeal(\'' + day.date + '\',\'down\')">▼</button>'
+      : '';
+    var dayLabel = isToday ? 'Heute' : isTomorrow ? 'Morgen' : (weekday(day.date) + '<span class="num">' + niceDate(day.date) + '</span>');
+    return '<div class="meal-day">' + dayLabel + '</div>' +
+      '<div class="meal-dish">' + dishHtml + '</div>' +
+      '<div class="meal-actions">' +
+        upBtn +
+        downBtn +
+        '<button class="meal-icon-btn" title="Anderes Gericht auswürfeln" onclick="shuffleMeal(\'' + day.date + '\')">🎲</button>' +
+        '<button class="meal-icon-btn" title="Gericht wählen" onclick="openMealPick(\'' + day.date + '\')">✏️</button>' +
+      '</div>';
+  }
+
+  /** Voller (gestaffelt animierter) Neuaufbau – nur bei Erstladung/Ansichtenwechsel/Ampel-Umschalter. */
+  function renderMeals() {
+    var host = document.getElementById('mealPlan');
+    if (!host) return;
+    var total = MEALS.days.length;
+    var html = MEALS.days.map(function(day, i) {
+      var isToday = day.date === MEALS.today;
+      var delay = Math.min(i, 8) * 0.05;
+      return '<div class="meal-card' + (isToday ? ' today' : '') + '" data-date="' + day.date + '" style="--d:' + delay + 's">' +
+        mealCardInnerHTML(day, i, total) + '</div>';
+    }).join('');
+    host.innerHTML = html || '<div class="empty"><div class="big">🍽️</div>Noch keine Gerichte hinterlegt.</div>';
+  }
+
+  /** Aktualisiert genau eine Tageskarte in-place, ohne die restliche Liste neu zu animieren. */
+  function updateMealCard(date, effect) {
+    var host = document.getElementById('mealPlan');
+    if (!host) return;
+    var i = MEALS.days.findIndex(function(d) { return d.date === date; });
+    if (i === -1) return;
+    var card = host.querySelector('.meal-card[data-date="' + date + '"]');
+    if (!card) { renderMeals(); return; }
+    var day = MEALS.days[i];
+    card.classList.toggle('today', day.date === MEALS.today);
+    card.innerHTML = mealCardInnerHTML(day, i, MEALS.days.length);
+
+    if (effect === 'roll') {
+      var icon = card.querySelector('.meal-icon');
+      if (icon) {
+        icon.classList.add('roll');
+        setTimeout(function() { icon.classList.remove('roll'); }, 900);
+      }
+    } else if (effect === 'flash') {
+      card.classList.add('swap-flash');
+      setTimeout(function() { card.classList.remove('swap-flash'); }, 550);
+    }
+  }
+
+  function shuffleMeal(date) {
+    callApi('/api/meals-set', { date: date, dishId: null, user: currentUser || '' })
+      .then(function(d) { MEALS = d; updateMealCard(date, 'roll'); toast('🎲 Neues Gericht gewürfelt'); })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function slideDish(el, fromDeltaY) {
+    if (!el) return;
+    el.classList.add('sliding');
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(' + fromDeltaY + 'px)';
+    void el.offsetHeight;
+    el.style.transition = 'transform .42s cubic-bezier(.34,1.56,.64,1)';
+    el.style.transform = 'translateY(0)';
+    setTimeout(function() {
+      el.classList.remove('sliding');
+      el.style.transition = '';
+      el.style.transform = '';
+    }, 440);
+  }
+
+  function moveMeal(date, direction) {
+    var neighbor = addDaysClient_(date, direction === 'up' ? -1 : 1);
+    var host = document.getElementById('mealPlan');
+    var dishA = host && host.querySelector('.meal-card[data-date="' + date + '"] .meal-dish');
+    var dishB = host && host.querySelector('.meal-card[data-date="' + neighbor + '"] .meal-dish');
+    var rectA = dishA && dishA.getBoundingClientRect();
+    var rectB = dishB && dishB.getBoundingClientRect();
+
+    callApi('/api/meals-move', { date: date, direction: direction, user: currentUser || '' })
+      .then(function(d) {
+        MEALS = d;
+        updateMealCard(date);
+        updateMealCard(neighbor);
+
+        if (rectA && rectB) {
+          var newDishA = host.querySelector('.meal-card[data-date="' + date + '"] .meal-dish');
+          var newDishB = host.querySelector('.meal-card[data-date="' + neighbor + '"] .meal-dish');
+          var newRectA = newDishA && newDishA.getBoundingClientRect();
+          var newRectB = newDishB && newDishB.getBoundingClientRect();
+          if (newRectA) slideDish(newDishA, rectB.top - newRectA.top);
+          if (newRectB) slideDish(newDishB, rectA.top - newRectB.top);
+        }
+        toast(direction === 'up' ? '⬆️ Getauscht' : '⬇️ Getauscht');
+      })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function openMealPick(date) {
+    if (!MEALS.dishes.length) { toast('Bitte zuerst ein Gericht anlegen'); openDishModal(); return; }
+    mealPickDate = date;
+    var day = MEALS.days.filter(function(d) { return d.date === date; })[0];
+    var sel = document.getElementById('mealPickSelect');
+    sel.innerHTML = MEALS.dishes.map(function(d) {
+      return '<option value="' + esc(d.id) + '">' + healthEmoji(d.health) + ' ' + esc(d.icon) + ' ' + esc(d.name) + '</option>';
+    }).join('');
+    if (day && day.dishId) sel.value = day.dishId;
+    document.getElementById('mealPickTitle').textContent = 'Gericht für ' + weekday(date) + ' ' + niceDate(date);
+    document.getElementById('mealPickModalBack').classList.add('open');
+  }
+  function closeMealPick() {
+    document.getElementById('mealPickModalBack').classList.remove('open');
+    mealPickDate = null;
+  }
+  function saveMealPick() {
+    if (!mealPickDate) return;
+    var dishId = document.getElementById('mealPickSelect').value;
+    var pickedDate = mealPickDate;
+    callApi('/api/meals-set', { date: pickedDate, dishId: dishId, user: currentUser || '' })
+      .then(function(d) { MEALS = d; updateMealCard(pickedDate, 'flash'); closeMealPick(); toast('🍽️ Speiseplan aktualisiert'); })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function openDishModal() {
+    resetDishForm();
+    renderDishManageList();
+    document.getElementById('dishModalBack').classList.add('open');
+    document.getElementById('dishName').focus();
+  }
+  function pickDishIcon(btn, ic) {
+    pickedDishIcon = ic;
+    document.querySelectorAll('#dishIconPick button').forEach(function(b) { b.classList.remove('sel'); });
+    btn.classList.add('sel');
+  }
+  function renderIconPick() {
+    var ip = document.getElementById('dishIconPick');
+    ip.innerHTML = FOOD_ICONS.map(function(ic) {
+      return '<button class="' + (ic === pickedDishIcon ? 'sel' : '') + '" onclick="pickDishIcon(this,\'' + ic + '\')">' + ic + '</button>';
+    }).join('');
+  }
+  function healthEmoji(h) {
+    return h === 'green' ? '🟢' : h === 'red' ? '🔴' : '🟡';
+  }
+  function pickDishHealth(h) {
+    pickedDishHealth = h;
+    renderHealthPick();
+  }
+  function renderHealthPick() {
+    document.querySelectorAll('#dishHealthPick button').forEach(function(b) {
+      b.classList.toggle('sel', b.getAttribute('data-h') === pickedDishHealth);
+    });
+  }
+  function closeDishModal() {
+    document.getElementById('dishModalBack').classList.remove('open');
+    resetDishForm();
+  }
+  function resetDishForm() {
+    editingDishId = null;
+    pickedDishIcon = '🍽️';
+    pickedDishHealth = 'yellow';
+    document.getElementById('dishName').value = '';
+    document.getElementById('dishSave').textContent = 'Gericht speichern';
+    renderIconPick();
+    renderHealthPick();
+  }
+  function saveDish() {
+    var name = document.getElementById('dishName').value.trim();
+    if (!name) { toast('Bitte einen Namen eingeben'); return; }
+    var isEdit = !!editingDishId;
+    var btn = document.getElementById('dishSave');
+    btn.disabled = true; btn.textContent = isEdit ? 'Wird aktualisiert …' : 'Wird gespeichert …';
+    var payload = { name: name, icon: pickedDishIcon, health: pickedDishHealth, user: currentUser || '' };
+    var endpoint = '/api/dishes-add';
+    if (isEdit) { payload.id = editingDishId; endpoint = '/api/dishes-update'; }
+    callApi(endpoint, payload)
+      .then(function(d) {
+        MEALS = d;
+        renderMeals();
+        renderDishManageList();
+        resetDishForm();
+        btn.disabled = false;
+        toast(isEdit ? '✏️ Gericht aktualisiert' : '🍲 Gericht hinzugefügt');
+      })
+      .catch(function(err) {
+        btn.disabled = false; btn.textContent = isEdit ? 'Gericht aktualisieren' : 'Gericht speichern';
+        toast('⚠️ ' + err.message);
+      });
+  }
+
+  function renderDishManageList() {
+    var host = document.getElementById('dishManageList');
+    if (!host) return;
+    var list = MEALS.dishes || [];
+    var html = list.map(function(d, i) {
+      return '<div class="dish-manage-row">' +
+        '<span class="dm-icon">' + esc(d.icon) + '</span>' +
+        '<span class="health-dot health-' + esc(d.health || 'yellow') + '" title="Gesundheitsampel"></span>' +
+        '<span class="dm-name">' + esc(d.name) + '</span>' +
+        '<div class="dm-actions">' +
+          '<button class="dm-btn"' + (i === 0 ? ' disabled' : '') + ' onclick="reorderDish(\'' + d.id + '\',\'up\')" title="Nach oben">▲</button>' +
+          '<button class="dm-btn"' + (i === list.length - 1 ? ' disabled' : '') + ' onclick="reorderDish(\'' + d.id + '\',\'down\')" title="Nach unten">▼</button>' +
+          '<button class="dm-btn" onclick="startEditDish(\'' + d.id + '\')" title="Bearbeiten">✏️</button>' +
+          '<button class="dm-btn danger" onclick="deleteDish(\'' + d.id + '\')" title="Löschen">🗑️</button>' +
+        '</div></div>';
+    }).join('');
+    host.innerHTML = html || '<div class="empty" style="padding:20px 10px;">Noch keine Gerichte.</div>';
+  }
+
+  function startEditDish(id) {
+    var d = (MEALS.dishes || []).filter(function(x) { return x.id === id; })[0];
+    if (!d) return;
+    editingDishId = id;
+    pickedDishIcon = d.icon;
+    pickedDishHealth = d.health || 'yellow';
+    document.getElementById('dishName').value = d.name;
+    renderIconPick();
+    renderHealthPick();
+    document.getElementById('dishSave').textContent = 'Gericht aktualisieren';
+    document.getElementById('dishName').focus();
+  }
+
+  function deleteDish(id) {
+    var d = (MEALS.dishes || []).filter(function(x) { return x.id === id; })[0];
+    var name = d ? d.name : 'dieses Gericht';
+    if (!window.confirm('„' + name + '“ endgültig löschen?')) return;
+    callApi('/api/dishes-delete', { id: id, user: currentUser || '' })
+      .then(function(data) {
+        MEALS = data;
+        if (editingDishId === id) resetDishForm();
+        renderMeals();
+        renderDishManageList();
+        toast('🗑️ Gericht gelöscht');
+      })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function reorderDish(id, direction) {
+    callApi('/api/dishes-reorder', { id: id, direction: direction })
+      .then(function(data) { MEALS = data; renderDishManageList(); })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function loadMyMessages(user) {
+    if (!user) { DATA.myMessages = []; return; }
+    callApi('/api/messages?user=' + encodeURIComponent(user))
+      .then(function(d) { DATA.myMessages = (d && d.texts) || []; })
+      .catch(function() { DATA.myMessages = []; });
+  }
+
+  function setUser(name) {
+    currentUser = name;
+    try { localStorage.setItem('pp_user', name); } catch (e) {}
+    renderWho();
+    var chips = document.querySelectorAll('.who-chip.active');
+    chips.forEach(function(c) {
+      c.classList.add('pop');
+      setTimeout(function() { c.classList.remove('pop'); }, 450);
+    });
+    loadMyMessages(name);
+  }
+
+  /* ---------- Aktionen ---------- */
+  function doAction(id, kind, early) {
+    if (busy[id]) return;
+    busy[id] = true;
+    var card = document.getElementById('card-' + id);
+    var taskObj = DATA.tasks.filter(function(t){ return t.id === id; })[0];
+    var taskName = taskObj ? taskObj.name : '';
+    var beforeToday = (currentUser && DATA.stats && DATA.stats.todayCounts[currentUser]) || 0;
+
+    function proceed() {
+      if (card) card.classList.add('leaving');
+      runRequest();
+    }
+
+    if (kind === 'complete' && card) {
+      var iconEl = card.querySelector('.icon');
+      if (iconEl) {
+        iconEl.textContent = '✓';
+        iconEl.classList.add('done-flash');
+      }
+      setTimeout(proceed, 320);
+    } else {
+      proceed();
+    }
+
+    function onSuccess(data) {
+      busy[id] = false;
+      DATA = data;
+      if (kind === 'skip') suppressNextConfetti = true;
+      render();
+      if (kind === 'complete') {
+        var personal = DATA.myMessages || [];
+        var usePersonal = personal.length > 0 && Math.random() < 0.35;
+        if (usePersonal) {
+          showMessageBanner(personal[Math.floor(Math.random() * personal.length)]);
+        } else {
+          toast(pickDoneMessage(taskName, !!early));
+        }
+        var afterToday = (currentUser && DATA.stats && DATA.stats.todayCounts[currentUser]) || 0;
+        if (currentUser && afterToday !== beforeToday && RESPECT_THRESHOLDS.indexOf(afterToday) !== -1) {
+          setTimeout(function() {
+            showMessageBanner('👏 Respekt, ' + currentUser + '! Schon ' + afterToday + ' Aufgaben heute erledigt.');
+          }, usePersonal ? 900 : 0);
+        }
+      } else if (kind === 'skip') {
+        toast('⏭ Übersprungen – nächster Turnus');
+      } else {
+        toast('→ Auf morgen verschoben');
+      }
+    }
+    function onFailure(err) {
+      busy[id] = false;
+      if (card) card.classList.remove('leaving');
+      toast('⚠️ ' + err.message);
+    }
+
+    function runRequest() {
+      if (kind === 'complete') {
+        callApi('/api/complete', { id: id, user: currentUser || '', isEarly: !!early }).then(onSuccess).catch(onFailure);
+      } else if (kind === 'skip') {
+        callApi('/api/skip', { id: id, user: currentUser || '' }).then(onSuccess).catch(onFailure);
+      } else {
+        callApi('/api/postpone', { id: id, user: currentUser || '' }).then(onSuccess).catch(onFailure);
+      }
+    }
+  }
+
+  /* ---------- Hinzufügen ---------- */
+  function openModal() {
+    var cats = {};
+    DATA.tasks.forEach(function(t){ cats[t.category] = true; });
+    var catSel = document.getElementById('fCat');
+    catSel.innerHTML = Object.keys(cats).sort().map(function(c) {
+      return '<option>' + esc(c) + '</option>';
+    }).join('') + '<option>Sonstiges</option>';
+    var ip = document.getElementById('iconPick');
+    ip.innerHTML = ICONS.map(function(ic) {
+      return '<button class="' + (ic === pickedIcon ? 'sel' : '') + '" onclick="pickIcon(this,\'' + ic + '\')">' + ic + '</button>';
+    }).join('');
+    document.getElementById('modalBack').classList.add('open');
+    document.getElementById('fName').focus();
+  }
+  function pickIcon(btn, ic) {
+    pickedIcon = ic;
+    document.querySelectorAll('#iconPick button').forEach(function(b){ b.classList.remove('sel'); });
+    btn.classList.add('sel');
+  }
+  function closeModal() {
+    document.getElementById('modalBack').classList.remove('open');
+  }
+
+  /* ---------- Einmalige Aufgabe ---------- */
+  function openOneOffModal() {
+    document.getElementById('oneoffModalBack').classList.add('open');
+    document.getElementById('ooName').focus();
+  }
+  function closeOneOffModal() {
+    document.getElementById('oneoffModalBack').classList.remove('open');
+  }
+  function saveOneOffTask() {
+    var name = document.getElementById('ooName').value.trim();
+    if (!name) { toast('Bitte einen Namen eingeben'); return; }
+    var obj = {
+      name: name,
+      category: 'Einmalig',
+      interval: 1,
+      icon: '1x',
+      oneOff: true
+    };
+    var btn = document.getElementById('ooSave');
+    btn.disabled = true; btn.textContent = 'Wird gespeichert …';
+    obj.user = currentUser || '';
+    callApi('/api/add-task', obj)
+      .then(function(data) {
+        DATA = data;
+        sessionStorage.setItem('pp_total', 0);
+        render();
+        closeOneOffModal();
+        document.getElementById('ooName').value = '';
+        btn.disabled = false; btn.textContent = 'Aufgabe speichern';
+        toast('⚡ Einmalige Aufgabe hinzugefügt');
+      })
+      .catch(function(err) {
+        btn.disabled = false; btn.textContent = 'Aufgabe speichern';
+        toast('⚠️ ' + err.message);
+      });
+  }
+
+  /* ---------- Rückwirkend erledigt ---------- */
+  var currentRetroTaskId = null;
+  function addDaysClient_(dateStr, delta) {
+    var p = dateStr.split('-');
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    d.setDate(d.getDate() + delta);
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+  function openRetroModal(id) {
+    currentRetroTaskId = id;
+    var t = DATA.tasks.filter(function(x) { return x.id === id; })[0];
+    document.getElementById('retroTitle').textContent = '🕓 Rückwirkend erledigt' + (t ? ': ' + t.name : '');
+    var yesterday = addDaysClient_(DATA.today, -1);
+    var weekAgo = addDaysClient_(DATA.today, -7);
+    var dInput = document.getElementById('retroDate');
+    dInput.min = weekAgo;
+    dInput.max = yesterday;
+    dInput.value = yesterday;
+    document.getElementById('retroModalBack').classList.add('open');
+  }
+  function closeRetroModal() {
+    document.getElementById('retroModalBack').classList.remove('open');
+    currentRetroTaskId = null;
+  }
+  function saveRetro() {
+    if (!currentRetroTaskId) return;
+    var dateStr = document.getElementById('retroDate').value;
+    if (!dateStr) { toast('Bitte ein Datum wählen'); return; }
+    var btn = document.getElementById('retroSave');
+    btn.disabled = true; btn.textContent = 'Wird gespeichert …';
+    callApi('/api/complete-retro', { id: currentRetroTaskId, user: currentUser || '', dateStr: dateStr })
+      .then(function(data) {
+        DATA = data;
+        render();
+        closeRetroModal();
+        btn.disabled = false; btn.textContent = 'Als erledigt markieren';
+        toast('🕓 Rückwirkend erledigt vermerkt');
+      })
+      .catch(function(err) {
+        btn.disabled = false; btn.textContent = 'Als erledigt markieren';
+        toast('⚠️ ' + err.message);
+      });
+  }
+
+  function saveTask() {
+    var name = document.getElementById('fName').value.trim();
+    if (!name) { toast('Bitte einen Namen eingeben'); return; }
+    var obj = {
+      name: name,
+      category: document.getElementById('fCat').value,
+      interval: Number(document.getElementById('fInt').value) || 7,
+      icon: pickedIcon
+    };
+    var btn = document.getElementById('btnSave');
+    btn.disabled = true; btn.textContent = 'Wird gespeichert …';
+    obj.user = currentUser || '';
+    callApi('/api/add-task', obj)
+      .then(function(data) {
+        DATA = data;
+        sessionStorage.setItem('pp_total', 0); // Zähler neu kalibrieren
+        render();
+        closeModal();
+        document.getElementById('fName').value = '';
+        btn.disabled = false; btn.textContent = 'Aufgabe speichern';
+        toast('✨ Aufgabe hinzugefügt');
+      })
+      .catch(function(err) {
+        btn.disabled = false; btn.textContent = 'Aufgabe speichern';
+        toast('⚠️ ' + err.message);
+      });
+  }
+
+  /* ---------- Sonstiges ---------- */
+  var toastTimer;
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2200);
+  }
+
+  /* ---------- Einkaufsliste ---------- */
+  var editingShopId = null;
+  var pendingAktion = false;
+  var pendingTk = false;
+  var pendingDrogerie = false;
+
+  function loadShopping() {
+    return callApi('/api/shopping').then(function(d) { SHOPPING = d; renderShoppingList(); });
+  }
+
+  function renderShoppingList() {
+    var host = document.getElementById('shoppingList');
+    if (!host) return;
+    var items = SHOPPING.items || [];
+    document.getElementById('shopCount').textContent = items.length;
+    var html = items.map(function(it, i) {
+      var delay = Math.min(i, 8) * 0.04;
+      var tags = (it.aktion ? '<span class="shop-tag aktion" title="Aktion">🏷️</span>' : '') +
+        (it.tk ? '<span class="shop-tag tk" title="TK">❄️</span>' : '') +
+        (it.drogerie ? '<span class="shop-tag drogerie" title="Drogerie">🧴</span>' : '');
+      var prevDiffers = i > 0 && items[i - 1].checked !== it.checked;
+      var nextDiffers = i < items.length - 1 && items[i + 1].checked !== it.checked;
+      var upDisabled = i === 0 || prevDiffers;
+      var downDisabled = i === items.length - 1 || nextDiffers;
+      return '<div class="shop-item' + (it.checked ? ' checked' : '') + '" style="--d:' + delay + 's">' +
+        '<button class="shop-check" onclick="toggleShopItem(\'' + it.id + '\')" aria-label="Erledigt">' +
+          (it.checked ? '✓' : '') +
+        '</button>' +
+        '<div class="shop-name">' + esc(it.name) + tags + '</div>' +
+        '<div class="dm-actions">' +
+          '<button class="dm-btn"' + (upDisabled ? ' disabled' : '') + ' onclick="reorderShop(\'' + it.id + '\',\'up\')" title="Nach oben">▲</button>' +
+          '<button class="dm-btn"' + (downDisabled ? ' disabled' : '') + ' onclick="reorderShop(\'' + it.id + '\',\'down\')" title="Nach unten">▼</button>' +
+          '<button class="dm-btn" onclick="startEditShop(\'' + it.id + '\')" title="Bearbeiten">✏️</button>' +
+          '<button class="dm-btn danger" onclick="deleteShopItem(\'' + it.id + '\')" title="Löschen">🗑️</button>' +
+        '</div></div>';
+    }).join('');
+    host.innerHTML = html || '<div class="empty"><div class="big">🛒</div>Einkaufsliste ist leer.</div>';
+  }
+
+  function pickTagAktion() {
+    pendingAktion = !pendingAktion;
+    document.getElementById('tagAktionBtn').classList.toggle('sel', pendingAktion);
+  }
+  function pickTagTk() {
+    pendingTk = !pendingTk;
+    document.getElementById('tagTkBtn').classList.toggle('sel', pendingTk);
+  }
+  function pickTagDrogerie() {
+    pendingDrogerie = !pendingDrogerie;
+    document.getElementById('tagDrogerieBtn').classList.toggle('sel', pendingDrogerie);
+  }
+
+  function resetShopForm() {
+    editingShopId = null;
+    pendingAktion = false;
+    pendingTk = false;
+    pendingDrogerie = false;
+    document.getElementById('shopInput').value = '';
+    document.getElementById('tagAktionBtn').classList.remove('sel');
+    document.getElementById('tagTkBtn').classList.remove('sel');
+    document.getElementById('tagDrogerieBtn').classList.remove('sel');
+    document.getElementById('shopAddBtn').textContent = '+';
+    document.getElementById('shopCancelEditBtn').hidden = true;
+  }
+
+  function startEditShop(id) {
+    var it = (SHOPPING.items || []).filter(function(x) { return x.id === id; })[0];
+    if (!it) return;
+    editingShopId = id;
+    pendingAktion = !!it.aktion;
+    pendingTk = !!it.tk;
+    pendingDrogerie = !!it.drogerie;
+    document.getElementById('shopInput').value = it.name;
+    document.getElementById('tagAktionBtn').classList.toggle('sel', pendingAktion);
+    document.getElementById('tagTkBtn').classList.toggle('sel', pendingTk);
+    document.getElementById('tagDrogerieBtn').classList.toggle('sel', pendingDrogerie);
+    document.getElementById('shopAddBtn').textContent = '✓';
+    document.getElementById('shopCancelEditBtn').hidden = false;
+    document.getElementById('shopInput').focus();
+  }
+
+  function addShopItem() {
+    var input = document.getElementById('shopInput');
+    var name = input.value.trim();
+    if (!name) { toast('Bitte einen Namen eingeben'); return; }
+    var isEdit = !!editingShopId;
+    var payload = { name: name, aktion: pendingAktion, tk: pendingTk, drogerie: pendingDrogerie, user: currentUser || '' };
+    var endpoint = '/api/shopping-add';
+    if (isEdit) { payload.id = editingShopId; endpoint = '/api/shopping-update'; }
+    callApi(endpoint, payload)
+      .then(function(d) {
+        SHOPPING = d;
+        renderShoppingList();
+        resetShopForm();
+        toast(isEdit ? '✏️ Eintrag aktualisiert' : '🛒 Hinzugefügt');
+      })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function toggleShopItem(id) {
+    callApi('/api/shopping-toggle', { id: id })
+      .then(function(d) { SHOPPING = d; renderShoppingList(); })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function deleteShopItem(id) {
+    callApi('/api/shopping-delete', { id: id })
+      .then(function(d) {
+        SHOPPING = d;
+        if (editingShopId === id) resetShopForm();
+        renderShoppingList();
+      })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  function reorderShop(id, direction) {
+    callApi('/api/shopping-reorder', { id: id, direction: direction })
+      .then(function(d) { SHOPPING = d; renderShoppingList(); })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+
+  /* ---------- Ansichts-Umschalter (Putzplan / Speiseplan / Einkauf) ---------- */
+  var VIEWS = ['tasks', 'meals', 'shopping'];
+  var VIEW_BTN_IDS = { tasks: 'viewTasksBtn', meals: 'viewMealsBtn', shopping: 'viewShoppingBtn' };
+  function setView(view) {
+    var idx = VIEWS.indexOf(view);
+    if (idx === -1) return;
+    currentView = view;
+    document.getElementById('viewTrack').style.transform = 'translateX(-' + (idx * 100 / VIEWS.length) + '%)';
+    VIEWS.forEach(function(v) {
+      document.getElementById(VIEW_BTN_IDS[v]).classList.toggle('active', v === view);
+    });
+    document.getElementById('fabAdd').style.display = view === 'tasks' ? '' : 'none';
+    try { sessionStorage.setItem('pp_view', view); } catch (e) {}
+  }
+
+  function initSwipe() {
+    var port = document.getElementById('viewPort');
+    var startX = null, startY = null, tracking = false;
+    port.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+    }, { passive: true });
+    port.addEventListener('touchend', function(e) {
+      if (!tracking || startX === null) { tracking = false; return; }
+      tracking = false;
+      var touch = e.changedTouches && e.changedTouches[0];
+      if (!touch) return;
+      var dx = touch.clientX - startX;
+      var dy = touch.clientY - startY;
+      startX = null;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        var idx = VIEWS.indexOf(currentView);
+        if (dx < 0 && idx < VIEWS.length - 1) setView(VIEWS[idx + 1]);
+        else if (dx > 0 && idx > 0) setView(VIEWS[idx - 1]);
+      }
+    });
+  }
+
+  function showMessageBanner(text) {
+    document.getElementById('messageBannerText').textContent = text;
+    document.getElementById('messageBanner').classList.add('show');
+  }
+  function hideMessageBanner() {
+    document.getElementById('messageBanner').classList.remove('show');
+  }
+
+  document.getElementById('fabAdd').addEventListener('click', openModal);
+  document.getElementById('messageBannerBtn').addEventListener('click', hideMessageBanner);
+  document.getElementById('addOneOffBtn').addEventListener('click', openOneOffModal);
+  document.getElementById('ooCancel').addEventListener('click', closeOneOffModal);
+  document.getElementById('ooSave').addEventListener('click', saveOneOffTask);
+  document.getElementById('oneoffModalBack').addEventListener('click', function(e) {
+    if (e.target === this) closeOneOffModal();
+  });
+  document.getElementById('retroCancel').addEventListener('click', closeRetroModal);
+  document.getElementById('retroSave').addEventListener('click', saveRetro);
+  document.getElementById('retroModalBack').addEventListener('click', function(e) {
+    if (e.target === this) closeRetroModal();
+  });
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnSave').addEventListener('click', saveTask);
+  document.getElementById('modalBack').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  document.getElementById('addDishBtn').addEventListener('click', openDishModal);
+  document.getElementById('dishCancel').addEventListener('click', closeDishModal);
+  document.getElementById('dishSave').addEventListener('click', saveDish);
+  document.getElementById('dishModalBack').addEventListener('click', function(e) {
+    if (e.target === this) closeDishModal();
+  });
+  document.getElementById('mealPickCancel').addEventListener('click', closeMealPick);
+  document.getElementById('mealPickSave').addEventListener('click', saveMealPick);
+  document.getElementById('mealPickModalBack').addEventListener('click', function(e) {
+    if (e.target === this) closeMealPick();
+  });
+  document.getElementById('viewTasksBtn').addEventListener('click', function() { setView('tasks'); });
+  document.getElementById('viewMealsBtn').addEventListener('click', function() { setView('meals'); });
+  document.getElementById('viewShoppingBtn').addEventListener('click', function() { setView('shopping'); });
+  initSwipe();
+  var healthToggleEl = document.getElementById('healthToggle');
+  healthToggleEl.checked = showHealth;
+  healthToggleEl.addEventListener('change', function() {
+    showHealth = healthToggleEl.checked;
+    try { localStorage.setItem('pp_show_health', showHealth ? '1' : '0'); } catch (e) {}
+    renderMeals();
+  });
+  document.getElementById('shopAddBtn').addEventListener('click', addShopItem);
+  document.getElementById('shopCancelEditBtn').addEventListener('click', resetShopForm);
+  document.getElementById('tagAktionBtn').addEventListener('click', pickTagAktion);
+  document.getElementById('tagTkBtn').addEventListener('click', pickTagTk);
+  document.getElementById('tagDrogerieBtn').addEventListener('click', pickTagDrogerie);
+  document.getElementById('shopInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') addShopItem();
+  });
+
+  /* ---------- Start ---------- */
+  function getUserParam() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var u = params.get('user');
+      return u ? u.trim() : null;
+    } catch (e) { return null; }
+  }
+
+  try { currentUser = localStorage.getItem('pp_user'); } catch (e) {}
+  var urlUser = getUserParam();
+  sessionStorage.setItem('pp_total', 0);
+  callApi('/api/data')
+    .then(function(data) {
+      DATA = data;
+      if (urlUser) {
+        var match = DATA.members.filter(function(m) {
+          return m.name.toLowerCase() === urlUser.toLowerCase();
+        })[0];
+        if (match) {
+          currentUser = match.name;
+          try { localStorage.setItem('pp_user', match.name); } catch (e) {}
+        }
+      }
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      render();
+      loadMyMessages(currentUser);
+      loadMeals();
+      loadShopping();
+    })
+    .catch(function(err) {
+      document.getElementById('loading').innerHTML = '⚠️ ' + esc(err.message);
+    });
+</script>
+</body>
+</html>

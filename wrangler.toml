@@ -1,0 +1,8 @@
+name = "gw5-facility-management"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gw5"
+database_id = "af77c546-c979-4dad-b03b-1b511d0cc410"
