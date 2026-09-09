@@ -478,8 +478,9 @@
     background: var(--accent-soft); margin-bottom: 8px;
   }
   .shop-drag {
-    flex: 0 0 auto; width: 22px; text-align: center; color: var(--muted); font-size: 16px;
-    cursor: grab; touch-action: none; line-height: 1;
+    flex: 0 0 auto; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    text-align: center; color: var(--muted); font-size: 20px; margin: -4px 0;
+    cursor: grab; touch-action: none; line-height: 1; user-select: none; -webkit-user-select: none;
   }
   .shop-check {
     width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); flex: 0 0 auto;
@@ -1584,15 +1585,19 @@
       var item = handle.closest('.shop-item');
       if (!item) return;
       e.preventDefault();
-      startShopDrag(item, e);
+      startShopDrag(item, handle, e);
     });
   }
 
-  function startShopDrag(item, startEvent) {
+  function startShopDrag(item, handle, startEvent) {
     var host = document.getElementById('shoppingList');
+    var pointerId = startEvent.pointerId;
+    try { handle.setPointerCapture(pointerId); } catch (e) {}
+
     var others = Array.prototype.slice.call(host.querySelectorAll('.shop-item')).filter(function(el) { return el !== item; });
     var startY = startEvent.clientY;
     var rect = item.getBoundingClientRect();
+    var moved = false;
 
     var placeholder = document.createElement('div');
     placeholder.className = 'shop-drag-placeholder';
@@ -1608,6 +1613,9 @@
     item.style.pointerEvents = 'none';
 
     function onMove(e) {
+      if (e.pointerId !== pointerId) return;
+      moved = true;
+      e.preventDefault();
       var dy = e.clientY - startY;
       item.style.top = (rect.top + dy) + 'px';
       var target = others.filter(function(el) { return el.isConnected; }).find(function(el) {
@@ -1618,10 +1626,12 @@
       else host.appendChild(placeholder);
     }
 
-    function onUp() {
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', onUp);
-      document.removeEventListener('pointercancel', onUp);
+    function onUp(e) {
+      if (e.pointerId !== pointerId) return;
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+      try { handle.releasePointerCapture(pointerId); } catch (err) {}
       item.classList.remove('dragging');
       item.style.position = '';
       item.style.left = '';
@@ -1632,15 +1642,16 @@
       placeholder.parentNode.insertBefore(item, placeholder);
       placeholder.remove();
 
+      if (!moved) return;
       var newOrder = Array.prototype.map.call(host.querySelectorAll('.shop-item'), function(el) {
         return el.getAttribute('data-id');
       });
       persistShopOrder(newOrder);
     }
 
-    document.addEventListener('pointermove', onMove);
-    document.addEventListener('pointerup', onUp);
-    document.addEventListener('pointercancel', onUp);
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
   }
 
   function persistShopOrder(ids) {
