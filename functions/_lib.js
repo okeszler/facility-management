@@ -132,13 +132,13 @@ export async function buildMealPlan(db, days) {
   for (let i = 0; i < days; i++) dates.push(addDays(today, i));
 
   const allDishRows = await db
-    .prepare('SELECT id, name, icon, active, sort_order, health FROM dishes ORDER BY sort_order ASC, name ASC')
+    .prepare('SELECT id, name, icon, active, sort_order FROM dishes ORDER BY sort_order ASC, name ASC')
     .all();
   const allDishes = allDishRows.results;
   const activeDishes = allDishes.filter((d) => d.active);
   const dishMap = {};
   allDishes.forEach((d) => {
-    dishMap[d.id] = { id: d.id, name: d.name, icon: d.icon || '🍽️', health: d.health || 'yellow' };
+    dishMap[d.id] = { id: d.id, name: d.name, icon: d.icon || '🍽️' };
   });
 
   const placeholders = dates.map((_, i) => '?' + (i + 1)).join(',');
@@ -184,12 +184,8 @@ export async function buildMealPlan(db, days) {
   return {
     today,
     days: daysOut,
-    dishes: activeDishes.map((d) => ({ id: d.id, name: d.name, icon: d.icon || '🍽️', health: d.health || 'yellow' }))
+    dishes: activeDishes.map((d) => ({ id: d.id, name: d.name, icon: d.icon || '🍽️' }))
   };
-}
-
-export function normalizeHealth(h) {
-  return h === 'green' || h === 'red' ? h : 'yellow';
 }
 
 /** Einkaufsliste: offene Einträge zuerst (nach Anlage sortiert), erledigte danach. */

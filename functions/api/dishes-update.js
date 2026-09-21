@@ -1,10 +1,10 @@
-import { buildMealPlan, jsonResponse, errorResponse, logAction, normalizeHealth } from '../_lib.js';
+import { buildMealPlan, jsonResponse, errorResponse, logAction } from '../_lib.js';
 
 export async function onRequestPost(context) {
   const db = context.env.DB;
   try {
     const body = await context.request.json();
-    const { id, name, icon, health, user } = body || {};
+    const { id, name, icon, user } = body || {};
     if (!id) return errorResponse('Gericht-ID fehlt.');
     if (!name || !String(name).trim()) return errorResponse('Bitte einen Namen für das Gericht angeben.');
 
@@ -12,8 +12,8 @@ export async function onRequestPost(context) {
     if (!existing) return errorResponse('Gericht nicht gefunden.', 404);
 
     await db
-      .prepare('UPDATE dishes SET name = ?1, icon = ?2, health = ?3 WHERE id = ?4')
-      .bind(String(name).trim(), icon || '🍽️', normalizeHealth(health), id)
+      .prepare('UPDATE dishes SET name = ?1, icon = ?2 WHERE id = ?3')
+      .bind(String(name).trim(), icon || '🍽️', id)
       .run();
 
     await logAction(db, id, name, 'Gericht bearbeitet', user);

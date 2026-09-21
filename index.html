@@ -324,31 +324,16 @@
   .view-page:last-child { padding-right: 0; }
 
   /* ---------- Speiseplan ---------- */
-  .meal-add-row { display: flex; align-items: center; justify-content: space-between; margin: -6px 2px 4px; }
+  .meal-add-row { display: flex; align-items: center; justify-content: flex-end; margin: -6px 2px 4px; }
   .meal-add-link {
     background: none; border: none; color: var(--accent); font-family: inherit;
     font-weight: 800; font-size: 13.5px; cursor: pointer; padding: 4px 2px;
   }
-  .toggle-row {
-    display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);
-    font-weight: 700; cursor: pointer; user-select: none;
-  }
-  .toggle-switch { position: relative; width: 38px; height: 22px; flex: 0 0 auto; }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .toggle-slider {
-    position: absolute; inset: 0; background: var(--line); border-radius: 22px;
-    transition: background .25s ease;
-  }
-  .toggle-slider::before {
-    content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px;
-    background: #fff; border-radius: 50%; transition: transform .25s var(--bounce);
-  }
-  .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
-  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
   .meal-card {
     background: var(--card); border-radius: var(--radius); border: 1px solid var(--line);
     padding: 12px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
     animation: meal-in .5s var(--bounce) both; animation-delay: var(--d, 0s);
+    transition: transform .18s ease, box-shadow .18s ease;
   }
   @keyframes meal-in {
     from { opacity: 0; transform: translateY(14px) scale(.97); }
@@ -425,14 +410,12 @@
     background: var(--bg); color: var(--ink); font-size: 16px; cursor: pointer;
   }
   .meal-icon-btn:active { transform: scale(.94); }
-  .meal-icon-btn.narrow { width: 19px; font-size: 13px; padding: 0; }
 
   /* ---------- Gerichte verwalten ---------- */
   .dish-manage-list { margin-top: 16px; max-height: 260px; overflow-y: auto; }
   .dish-manage-row {
     display: flex; align-items: center; gap: 8px; padding: 9px 2px;
     border-top: 1px solid var(--line); flex-wrap: wrap;
-    transition: transform .18s ease, box-shadow .18s ease;
   }
   .dm-drag {
     flex: 0 0 auto; width: 26px; height: 34px; display: flex; align-items: center; justify-content: center;
@@ -446,10 +429,6 @@
       8px 5px 0 var(--muted),
       0 10px 0 var(--muted),
       8px 10px 0 var(--muted);
-  }
-  .dish-manage-row.dragging {
-    background: var(--card); border-radius: var(--radius); border: 1px solid var(--line);
-    padding: 9px 10px;
   }
   .dish-manage-row:first-child { border-top: none; }
   .dish-manage-row .dm-icon { font-size: 19px; width: 22px; text-align: center; flex: 0 0 auto; }
@@ -533,23 +512,6 @@
   .shop-tag.tk { background: rgba(56,138,221,.22); }
   .dm-actions { display: flex; gap: 4px; flex: 0 0 auto; }
 
-  /* ---------- Ampel (Gesundheit der Mahlzeit) ---------- */
-  .health-dot {
-    display: inline-block; width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto;
-    border: 1px solid rgba(0,0,0,.25);
-  }
-  .health-dot.health-red { background: #E2694A; }
-  .health-dot.health-yellow { background: #E3B23C; }
-  .health-dot.health-green { background: #55B27C; }
-  .health-pick { display: flex; gap: 10px; }
-  .health-pick button {
-    width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; padding: 0;
-  }
-  .health-pick button.sel { border-color: var(--ink); }
-  .health-pick button[data-h="red"] { background: #E2694A; }
-  .health-pick button[data-h="yellow"] { background: #E3B23C; }
-  .health-pick button[data-h="green"] { background: #55B27C; }
-
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
   }
@@ -595,10 +557,6 @@
         <div class="view-page">
           <div class="section-title">🍽️ Speiseplan <span class="count">7 Tage</span></div>
           <div class="meal-add-row">
-            <label class="toggle-row" for="healthToggle">
-              <span class="toggle-switch"><input type="checkbox" id="healthToggle" checked><span class="toggle-slider"></span></span>
-              Gesundheitsampel anzeigen
-            </label>
             <button class="meal-add-link" id="addDishBtn">Gerichte verwalten</button>
           </div>
           <div id="mealPlan"></div>
@@ -709,14 +667,6 @@
       <label>Icon</label>
       <div class="icon-pick" id="dishIconPick"></div>
     </div>
-    <div class="field">
-      <label>Gesundheitsampel (wie gesund ist das Gericht?)</label>
-      <div class="health-pick" id="dishHealthPick">
-        <button type="button" data-h="green" title="Grün – gesund" onclick="pickDishHealth('green')"></button>
-        <button type="button" data-h="yellow" title="Gelb – okay" onclick="pickDishHealth('yellow')"></button>
-        <button type="button" data-h="red" title="Rot – Ausnahme" onclick="pickDishHealth('red')"></button>
-      </div>
-    </div>
     <button class="save" id="dishSave">Gericht speichern</button>
     <div class="dish-manage-list" id="dishManageList"></div>
     <button class="cancel" id="dishCancel">Schließen</button>
@@ -756,11 +706,8 @@
   var RESPECT_THRESHOLDS = [3, 5, 8, 12];
 
   var MEALS = { today: '', days: [], dishes: [] };
-  var showHealth = true;
-  try { var savedShowHealth = localStorage.getItem('pp_show_health'); if (savedShowHealth !== null) showHealth = savedShowHealth === '1'; } catch (e) {}
   var FOOD_ICONS = ['🍽️','🍝','🍕','🍔','🍛','🍲','🍚','🐟','🍖','🥗','🍜','🥔','🍳','🫘','🥩','🍗','🥪','🍞','🧀','🐔','🔥','❄️'];
   var pickedDishIcon = '🍽️';
-  var pickedDishHealth = 'yellow';
   var mealPickDate = null;
   var editingDishId = null;
   var currentView = 'tasks';
@@ -1009,45 +956,34 @@
     return callApi('/api/meals').then(function(d) { MEALS = d; renderMeals(); });
   }
 
-  function mealCardInnerHTML(day, i, total) {
+  function mealCardInnerHTML(day) {
     var isToday = day.date === MEALS.today;
     var isTomorrow = day.date === addDaysClient_(MEALS.today, 1);
-    var healthDot = showHealth
-      ? ' <span class="health-dot health-' + esc(day.dish && day.dish.health || 'yellow') + '" title="Gesundheitsampel"></span>'
-      : '';
     var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(72) + '</div>' : '';
     var dishHtml = day.dish
       ? '<div class="meal-icon">' + esc(day.dish.icon) + steamHtml + '</div>' +
-        '<div class="meal-info"><div class="meal-name">' + esc(day.dish.name) + healthDot + '</div></div>'
+        '<div class="meal-info"><div class="meal-name">' + esc(day.dish.name) + '</div></div>'
       : '<div class="meal-icon">❔</div>' +
         '<div class="meal-info"><div class="meal-name meal-empty">Noch kein Gericht</div></div>';
-    var upBtn = i > 0
-      ? '<button class="meal-icon-btn narrow" title="Mit Vortag tauschen" onclick="moveMeal(\'' + day.date + '\',\'up\')">▲</button>'
-      : '';
-    var downBtn = i < total - 1
-      ? '<button class="meal-icon-btn narrow" title="Mit Folgetag tauschen" onclick="moveMeal(\'' + day.date + '\',\'down\')">▼</button>'
-      : '';
     var dayLabel = isToday ? 'Heute' : isTomorrow ? 'Morgen' : (weekday(day.date) + '<span class="num">' + niceDate(day.date) + '</span>');
-    return '<div class="meal-day">' + dayLabel + '</div>' +
+    return '<span class="dm-drag" aria-hidden="true" title="Ziehen zum Tauschen"></span>' +
+      '<div class="meal-day">' + dayLabel + '</div>' +
       '<div class="meal-dish">' + dishHtml + '</div>' +
       '<div class="meal-actions">' +
-        upBtn +
-        downBtn +
         '<button class="meal-icon-btn" title="Anderes Gericht auswürfeln" onclick="shuffleMeal(\'' + day.date + '\')">🎲</button>' +
         '<button class="meal-icon-btn" title="Gericht wählen" onclick="openMealPick(\'' + day.date + '\')">✏️</button>' +
       '</div>';
   }
 
-  /** Voller (gestaffelt animierter) Neuaufbau – nur bei Erstladung/Ansichtenwechsel/Ampel-Umschalter. */
+  /** Voller (gestaffelt animierter) Neuaufbau – nur bei Erstladung/Ansichtenwechsel. */
   function renderMeals() {
     var host = document.getElementById('mealPlan');
     if (!host) return;
-    var total = MEALS.days.length;
     var html = MEALS.days.map(function(day, i) {
       var isToday = day.date === MEALS.today;
       var delay = Math.min(i, 8) * 0.05;
-      return '<div class="meal-card' + (isToday ? ' today' : '') + '" data-date="' + day.date + '" style="--d:' + delay + 's">' +
-        mealCardInnerHTML(day, i, total) + '</div>';
+      return '<div class="meal-card' + (isToday ? ' today' : '') + '" data-date="' + day.date + '" data-id="' + day.date + '" style="--d:' + delay + 's">' +
+        mealCardInnerHTML(day) + '</div>';
     }).join('');
     host.innerHTML = html || '<div class="empty"><div class="big">🍽️</div>Noch keine Gerichte hinterlegt.</div>';
   }
@@ -1062,7 +998,7 @@
     if (!card) { renderMeals(); return; }
     var day = MEALS.days[i];
     card.classList.toggle('today', day.date === MEALS.today);
-    card.innerHTML = mealCardInnerHTML(day, i, MEALS.days.length);
+    card.innerHTML = mealCardInnerHTML(day);
 
     if (effect === 'roll') {
       var icon = card.querySelector('.meal-icon');
@@ -1097,31 +1033,37 @@
     }, 440);
   }
 
-  function moveMeal(date, direction) {
-    var neighbor = addDaysClient_(date, direction === 'up' ? -1 : 1);
-    var host = document.getElementById('mealPlan');
-    var dishA = host && host.querySelector('.meal-card[data-date="' + date + '"] .meal-dish');
-    var dishB = host && host.querySelector('.meal-card[data-date="' + neighbor + '"] .meal-dish');
-    var rectA = dishA && dishA.getBoundingClientRect();
-    var rectB = dishB && dishB.getBoundingClientRect();
+  /** Persistiert die per Drag & Drop neu angeordneten Gericht-Zuweisungen.
+   * Die Tage selbst bleiben fix (chronologisch) – newOrderDates gibt an,
+   * welches Gericht (von welchem ursprünglichen Tag) jetzt an welcher
+   * Position liegt; das wird auf die festen Tages-Slots zurückgemappt. */
+  function persistMealOrder(newOrderDates) {
+    var originalDishByDate = {};
+    MEALS.days.forEach(function(d) { originalDishByDate[d.date] = d.dishId; });
+    var fixedDates = MEALS.days.map(function(d) { return d.date; });
+    var assignments = fixedDates.map(function(date, i) {
+      return { date: date, dishId: originalDishByDate[newOrderDates[i]] || null };
+    });
 
-    callApi('/api/meals-move', { date: date, direction: direction, user: currentUser || '' })
+    var beforeTops = {};
+    fixedDates.forEach(function(date) {
+      var el = document.querySelector('.meal-card[data-date="' + date + '"] .meal-dish');
+      if (el) beforeTops[date] = el.getBoundingClientRect().top;
+    });
+
+    callApi('/api/meals-order', { assignments: assignments, user: currentUser || '' })
       .then(function(d) {
         MEALS = d;
-        updateMealCard(date);
-        updateMealCard(neighbor);
-
-        if (rectA && rectB) {
-          var newDishA = host.querySelector('.meal-card[data-date="' + date + '"] .meal-dish');
-          var newDishB = host.querySelector('.meal-card[data-date="' + neighbor + '"] .meal-dish');
-          var newRectA = newDishA && newDishA.getBoundingClientRect();
-          var newRectB = newDishB && newDishB.getBoundingClientRect();
-          if (newRectA) slideDish(newDishA, rectB.top - newRectA.top);
-          if (newRectB) slideDish(newDishB, rectA.top - newRectB.top);
-        }
-        toast(direction === 'up' ? '⬆️ Getauscht' : '⬇️ Getauscht');
+        renderMeals();
+        fixedDates.forEach(function(date) {
+          var el = document.querySelector('.meal-card[data-date="' + date + '"] .meal-dish');
+          if (!el || beforeTops[date] === undefined) return;
+          var delta = beforeTops[date] - el.getBoundingClientRect().top;
+          if (Math.abs(delta) > 0.5) slideDish(el, delta);
+        });
+        toast('🍽️ Speiseplan neu sortiert');
       })
-      .catch(function(err) { toast('⚠️ ' + err.message); });
+      .catch(function(err) { toast('⚠️ ' + err.message); loadMeals(); });
   }
 
   function openMealPick(date) {
@@ -1130,7 +1072,7 @@
     var day = MEALS.days.filter(function(d) { return d.date === date; })[0];
     var sel = document.getElementById('mealPickSelect');
     sel.innerHTML = MEALS.dishes.map(function(d) {
-      return '<option value="' + esc(d.id) + '">' + healthEmoji(d.health) + ' ' + esc(d.icon) + ' ' + esc(d.name) + '</option>';
+      return '<option value="' + esc(d.id) + '">' + esc(d.icon) + ' ' + esc(d.name) + '</option>';
     }).join('');
     if (day && day.dishId) sel.value = day.dishId;
     document.getElementById('mealPickTitle').textContent = 'Gericht für ' + weekday(date) + ' ' + niceDate(date);
@@ -1166,18 +1108,6 @@
       return '<button class="' + (ic === pickedDishIcon ? 'sel' : '') + '" onclick="pickDishIcon(this,\'' + ic + '\')">' + ic + '</button>';
     }).join('');
   }
-  function healthEmoji(h) {
-    return h === 'green' ? '🟢' : h === 'red' ? '🔴' : '🟡';
-  }
-  function pickDishHealth(h) {
-    pickedDishHealth = h;
-    renderHealthPick();
-  }
-  function renderHealthPick() {
-    document.querySelectorAll('#dishHealthPick button').forEach(function(b) {
-      b.classList.toggle('sel', b.getAttribute('data-h') === pickedDishHealth);
-    });
-  }
   function closeDishModal() {
     document.getElementById('dishModalBack').classList.remove('open');
     resetDishForm();
@@ -1185,11 +1115,9 @@
   function resetDishForm() {
     editingDishId = null;
     pickedDishIcon = '🍽️';
-    pickedDishHealth = 'yellow';
     document.getElementById('dishName').value = '';
     document.getElementById('dishSave').textContent = 'Gericht speichern';
     renderIconPick();
-    renderHealthPick();
   }
   function saveDish() {
     var name = document.getElementById('dishName').value.trim();
@@ -1197,7 +1125,7 @@
     var isEdit = !!editingDishId;
     var btn = document.getElementById('dishSave');
     btn.disabled = true; btn.textContent = isEdit ? 'Wird aktualisiert …' : 'Wird gespeichert …';
-    var payload = { name: name, icon: pickedDishIcon, health: pickedDishHealth, user: currentUser || '' };
+    var payload = { name: name, icon: pickedDishIcon, user: currentUser || '' };
     var endpoint = '/api/dishes-add';
     if (isEdit) { payload.id = editingDishId; endpoint = '/api/dishes-update'; }
     callApi(endpoint, payload)
@@ -1218,12 +1146,10 @@
   function renderDishManageList() {
     var host = document.getElementById('dishManageList');
     if (!host) return;
-    var list = MEALS.dishes || [];
+    var list = (MEALS.dishes || []).slice().sort(function(a, b) { return a.name.localeCompare(b.name, 'de'); });
     var html = list.map(function(d) {
       return '<div class="dish-manage-row" data-id="' + d.id + '">' +
-        '<span class="dm-drag" aria-hidden="true"></span>' +
         '<span class="dm-icon">' + esc(d.icon) + '</span>' +
-        '<span class="health-dot health-' + esc(d.health || 'yellow') + '" title="Gesundheitsampel"></span>' +
         '<span class="dm-name">' + esc(d.name) + '</span>' +
         '<div class="dm-actions">' +
           '<button class="dm-btn" onclick="startEditDish(\'' + d.id + '\')" title="Bearbeiten">✏️</button>' +
@@ -1238,10 +1164,8 @@
     if (!d) return;
     editingDishId = id;
     pickedDishIcon = d.icon;
-    pickedDishHealth = d.health || 'yellow';
     document.getElementById('dishName').value = d.name;
     renderIconPick();
-    renderHealthPick();
     document.getElementById('dishSave').textContent = 'Gericht aktualisieren';
     document.getElementById('dishName').focus();
   }
@@ -1806,12 +1730,6 @@
       .catch(function(err) { toast('⚠️ ' + err.message); loadShopping(); });
   }
 
-  function persistDishOrder(ids) {
-    callApi('/api/dishes-order', { ids: ids })
-      .then(function(d) { MEALS = d; renderMeals(); renderDishManageList(); })
-      .catch(function(err) { toast('⚠️ ' + err.message); renderDishManageList(); });
-  }
-
   /* ---------- Ansichts-Umschalter (Putzplan / Speiseplan / Einkauf) ---------- */
   var VIEWS = ['tasks', 'meals', 'shopping'];
   var VIEW_BTN_IDS = { tasks: 'viewTasksBtn', meals: 'viewMealsBtn', shopping: 'viewShoppingBtn' };
@@ -1899,14 +1817,7 @@
   document.getElementById('viewShoppingBtn').addEventListener('click', function() { setView('shopping'); });
   initSwipe();
   initDragReorder('shoppingList', '.shop-item', '.shop-drag', persistShopOrder);
-  initDragReorder('dishManageList', '.dish-manage-row', '.dm-drag', persistDishOrder);
-  var healthToggleEl = document.getElementById('healthToggle');
-  healthToggleEl.checked = showHealth;
-  healthToggleEl.addEventListener('change', function() {
-    showHealth = healthToggleEl.checked;
-    try { localStorage.setItem('pp_show_health', showHealth ? '1' : '0'); } catch (e) {}
-    renderMeals();
-  });
+  initDragReorder('mealPlan', '.meal-card', '.dm-drag', persistMealOrder);
   document.getElementById('shopAddBtn').addEventListener('click', addShopItem);
   document.getElementById('shopCancelEditBtn').addEventListener('click', resetShopForm);
   document.getElementById('tagAktionBtn').addEventListener('click', pickTagAktion);
