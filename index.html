@@ -1577,10 +1577,6 @@
       var tags = (it.aktion ? '<span class="shop-tag aktion" title="Aktion">🏷️</span>' : '') +
         (it.tk ? '<span class="shop-tag tk" title="TK">❄️</span>' : '') +
         (it.drogerie ? '<span class="shop-tag drogerie" title="Drogerie">🧴</span>' : '');
-      var prevDiffers = i > 0 && items[i - 1].checked !== it.checked;
-      var nextDiffers = i < items.length - 1 && items[i + 1].checked !== it.checked;
-      var upDisabled = i === 0 || prevDiffers;
-      var downDisabled = i === items.length - 1 || nextDiffers;
       return '<div class="shop-item' + (it.checked ? ' checked' : '') + '" data-id="' + it.id + '" style="--d:' + delay + 's">' +
         '<span class="shop-drag" aria-hidden="true"></span>' +
         '<button class="shop-check" onclick="toggleShopItem(\'' + it.id + '\')" aria-label="Erledigt">' +
@@ -1588,8 +1584,6 @@
         '</button>' +
         '<div class="shop-name">' + esc(it.name) + tags + '</div>' +
         '<div class="dm-actions">' +
-          '<button class="dm-btn"' + (upDisabled ? ' disabled' : '') + ' onclick="reorderShop(\'' + it.id + '\',\'up\')" title="Nach oben">▲</button>' +
-          '<button class="dm-btn"' + (downDisabled ? ' disabled' : '') + ' onclick="reorderShop(\'' + it.id + '\',\'down\')" title="Nach unten">▼</button>' +
           '<button class="dm-btn" onclick="startEditShop(\'' + it.id + '\')" title="Bearbeiten">✏️</button>' +
           '<button class="dm-btn danger" onclick="deleteShopItem(\'' + it.id + '\')" title="Löschen">🗑️</button>' +
         '</div></div>';
@@ -1670,12 +1664,6 @@
         if (editingShopId === id) resetShopForm();
         renderShoppingList();
       })
-      .catch(function(err) { toast('⚠️ ' + err.message); });
-  }
-
-  function reorderShop(id, direction) {
-    callApi('/api/shopping-reorder', { id: id, direction: direction })
-      .then(function(d) { SHOPPING = d; renderShoppingList(); })
       .catch(function(err) { toast('⚠️ ' + err.message); });
   }
 
