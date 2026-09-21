@@ -1702,6 +1702,11 @@
     var rect = item.getBoundingClientRect();
     var moved = false;
 
+    // Die Einblend-Animation (meal-in, fill-mode "both") friert transform sonst
+    // dauerhaft ein und blockiert jede spätere Transform-Änderung per JS/Klasse.
+    item.style.animation = 'none';
+    others.forEach(function(el) { el.style.animation = 'none'; });
+
     var placeholder = document.createElement('div');
     placeholder.className = 'shop-drag-placeholder';
     placeholder.style.height = rect.height + 'px';
