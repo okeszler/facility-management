@@ -158,10 +158,6 @@
     background: var(--card); color: var(--accent); border: 2px solid var(--accent);
     padding: 8px 12px; font-size: 13px; min-width: auto;
   }
-  .btn.edit {
-    background: none; border: none; color: var(--muted); font-size: 15px;
-    padding: 3px 2px 0; min-width: auto; min-height: auto;
-  }
 
   /* ---------- Demnächst ---------- */
   .upcoming .card { opacity: .8; }
@@ -570,6 +566,7 @@
         <div class="view-page">
           <div class="top-row">
             <button class="oneoff-btn" id="addOneOffBtn">1× Einmalige Aufgabe</button>
+            <button class="oneoff-btn" id="manageTasksBtn">✏️ Aufgaben bearbeiten</button>
           </div>
           <div id="sections"></div>
         </div>
@@ -656,6 +653,14 @@
     </div>
     <button class="save" id="retroSave">Als erledigt markieren</button>
     <button class="cancel" id="retroCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="modal-back" id="taskManageModalBack">
+  <div class="modal">
+    <h2>Aufgaben bearbeiten ✏️</h2>
+    <div class="dish-manage-list" id="taskManageList"></div>
+    <button class="cancel" id="taskManageCancel">Schließen</button>
   </div>
 </div>
 
@@ -813,12 +818,10 @@
     var oneOffTag = t.oneOff ? '<span>· einmalig</span>' : '';
     var assigneeTag = t.assignee ? '<span>· ' + esc(t.assignee) + '</span>' : '';
     var right;
-    var editBtn = '<button class="btn edit" onclick="openEditTaskModal(\'' + t.id + '\')" title="Aufgabe bearbeiten">✏️</button>';
     if (mode === 'upcoming') {
       right = '<div class="actions">' +
         '<div class="due-info">' + weekday(t.due) + ' ' + niceDate(t.due) + '</div>' +
         '<button class="btn early" onclick="doAction(\'' + t.id + '\',\'complete\',true)">⏩ Jetzt erledigen</button>' +
-        editBtn +
         '</div>';
     } else {
       right = '<div class="actions">' +
@@ -826,7 +829,6 @@
         '<button class="btn later" onclick="doAction(\'' + t.id + '\',\'postpone\')">→ Morgen</button>' +
         '<button class="btn skip" onclick="doAction(\'' + t.id + '\',\'skip\')">⏭ Überspringen</button>' +
         '<button class="btn retro" onclick="openRetroModal(\'' + t.id + '\')">🕓 Rückwirkend erledigt</button>' +
-        editBtn +
         '</div>';
     }
     return '<div class="card" id="card-' + t.id + '" style="--d:' + (delay || 0) + 's">' +
@@ -1347,6 +1349,7 @@
   function openEditTaskModal(id) {
     var t = DATA.tasks.filter(function(x) { return x.id === id; })[0];
     if (!t) return;
+    closeTaskManageModal();
     editingTaskId = id;
     pickedIcon = t.icon || '🧹';
     document.getElementById('taskModalTitle').textContent = 'Aufgabe bearbeiten ✏️';
@@ -1358,6 +1361,35 @@
     renderTaskIconPick();
     document.getElementById('modalBack').classList.add('open');
     document.getElementById('fName').focus();
+  }
+
+  /* ---------- Aufgaben verwalten (Liste) ---------- */
+  function openTaskManageModal() {
+    renderTaskManageList();
+    document.getElementById('taskManageModalBack').classList.add('open');
+  }
+  function closeTaskManageModal() {
+    document.getElementById('taskManageModalBack').classList.remove('open');
+  }
+  function renderTaskManageList() {
+    var host = document.getElementById('taskManageList');
+    if (!host) return;
+    var list = (DATA.tasks || []).slice().sort(function(a, b) {
+      return a.category === b.category ? a.name.localeCompare(b.name) : a.category.localeCompare(b.category);
+    });
+    var html = list.map(function(t) {
+      var metaParts = [t.category, t.interval + (t.interval === 1 ? ' Tag' : ' Tage')];
+      if (t.assignee) metaParts.push(t.assignee);
+      return '<div class="dish-manage-row">' +
+        '<span class="dm-icon">' + esc(t.icon) + '</span>' +
+        '<span class="dm-name">' + esc(t.name) + '</span>' +
+        '<div class="dm-actions">' +
+          '<button class="dm-btn" onclick="openEditTaskModal(\'' + t.id + '\')" title="Bearbeiten">✏️</button>' +
+        '</div>' +
+        '<div style="flex:1 1 100%; padding-left:30px; font-size:12px; color:var(--muted);">' + esc(metaParts.join(' · ')) + '</div>' +
+      '</div>';
+    }).join('');
+    host.innerHTML = html || '<div class="empty" style="padding:20px 10px;">Noch keine Aufgaben.</div>';
   }
   function fillTaskCategorySelect(selected) {
     var cats = {};
@@ -1792,6 +1824,11 @@
   document.getElementById('btnSave').addEventListener('click', saveTask);
   document.getElementById('modalBack').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
+  });
+  document.getElementById('manageTasksBtn').addEventListener('click', openTaskManageModal);
+  document.getElementById('taskManageCancel').addEventListener('click', closeTaskManageModal);
+  document.getElementById('taskManageModalBack').addEventListener('click', function(e) {
+    if (e.target === this) closeTaskManageModal();
   });
   document.getElementById('addDishBtn').addEventListener('click', openDishModal);
   document.getElementById('dishCancel').addEventListener('click', closeDishModal);
