@@ -98,13 +98,14 @@ export async function buildFullData(db) {
   const today = todayStr();
 
   const taskRows = await db
-    .prepare('SELECT id, category, name, interval_days, due_date, icon, one_off FROM tasks WHERE active = 1')
+    .prepare('SELECT id, category, name, interval_days, assignee, due_date, icon, one_off FROM tasks WHERE active = 1')
     .all();
   const tasks = taskRows.results.map((r) => ({
     id: r.id,
     category: r.category || 'Sonstiges',
     name: r.name,
     interval: Math.max(1, Number(r.interval_days) || 1),
+    assignee: r.assignee || '',
     due: r.due_date || today,
     icon: r.icon || '🧹',
     oneOff: !!r.one_off

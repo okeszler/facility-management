@@ -4,7 +4,7 @@ export async function onRequestPost(context) {
   const db = context.env.DB;
   try {
     const body = await context.request.json();
-    const { id, name, category, interval, icon, user } = body || {};
+    const { id, name, category, interval, assignee, icon, user } = body || {};
     if (!id) return errorResponse('Aufgaben-ID fehlt.');
     if (!name || !String(name).trim()) return errorResponse('Bitte einen Aufgabennamen angeben.');
 
@@ -15,9 +15,9 @@ export async function onRequestPost(context) {
 
     await db
       .prepare(
-        `UPDATE tasks SET category = ?1, name = ?2, interval_days = ?3, icon = ?4 WHERE id = ?5`
+        `UPDATE tasks SET category = ?1, name = ?2, interval_days = ?3, assignee = ?4, icon = ?5 WHERE id = ?6`
       )
-      .bind(category || 'Sonstiges', String(name).trim(), safeInterval, icon || '🧹', id)
+      .bind(category || 'Sonstiges', String(name).trim(), safeInterval, assignee || '', icon || '🧹', id)
       .run();
 
     await logAction(db, id, name, 'bearbeitet', user);

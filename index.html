@@ -623,6 +623,10 @@
       </div>
     </div>
     <div class="field">
+      <label for="fAssignee">Zuständig</label>
+      <select id="fAssignee"></select>
+    </div>
+    <div class="field">
       <label>Icon</label>
       <div class="icon-pick" id="iconPick"></div>
     </div>
@@ -807,6 +811,7 @@
     var overdueTag = diff < 0
       ? '<span class="overdue-tag">' + (diff === -1 ? '1 Tag' : (-diff) + ' Tage') + ' überfällig</span>' : '';
     var oneOffTag = t.oneOff ? '<span>· einmalig</span>' : '';
+    var assigneeTag = t.assignee ? '<span>· ' + esc(t.assignee) + '</span>' : '';
     var right;
     var editBtn = '<button class="btn edit" onclick="openEditTaskModal(\'' + t.id + '\')" title="Aufgabe bearbeiten">✏️</button>';
     if (mode === 'upcoming') {
@@ -828,7 +833,7 @@
       '<div class="icon">' + esc(t.icon) + '</div>' +
       '<div class="info">' +
         '<div class="name">' + esc(t.name) + '</div>' +
-        '<div class="meta"><span>' + esc(t.category) + '</span>' + oneOffTag + overdueTag + '</div>' +
+        '<div class="meta"><span>' + esc(t.category) + '</span>' + assigneeTag + oneOffTag + overdueTag + '</div>' +
       '</div>' + right + '</div>';
   }
 
@@ -1334,6 +1339,7 @@
     document.getElementById('fName').value = '';
     fillTaskCategorySelect();
     document.getElementById('fInt').value = 7;
+    fillTaskAssigneeSelect();
     renderTaskIconPick();
     document.getElementById('modalBack').classList.add('open');
     document.getElementById('fName').focus();
@@ -1348,6 +1354,7 @@
     document.getElementById('fName').value = t.name;
     fillTaskCategorySelect(t.category);
     document.getElementById('fInt').value = t.interval;
+    fillTaskAssigneeSelect(t.assignee);
     renderTaskIconPick();
     document.getElementById('modalBack').classList.add('open');
     document.getElementById('fName').focus();
@@ -1361,6 +1368,17 @@
       return '<option>' + esc(c) + '</option>';
     }).join('') + '<option>Sonstiges</option>';
     if (selected) catSel.value = selected;
+  }
+  function fillTaskAssigneeSelect(selected) {
+    var names = (DATA.members || []).map(function(m) { return m.name; });
+    if (selected && names.indexOf(selected) === -1 && selected !== 'Everybody') names.push(selected);
+    var sel = document.getElementById('fAssignee');
+    var options = '<option value="">– niemand Bestimmtes –</option><option value="Everybody">Everybody</option>';
+    options += names.map(function(n) {
+      return '<option value="' + esc(n) + '">' + esc(n) + '</option>';
+    }).join('');
+    sel.innerHTML = options;
+    sel.value = selected || '';
   }
   function renderTaskIconPick() {
     var ip = document.getElementById('iconPick');
@@ -1469,6 +1487,7 @@
       name: name,
       category: document.getElementById('fCat').value,
       interval: Number(document.getElementById('fInt').value) || 7,
+      assignee: document.getElementById('fAssignee').value,
       icon: pickedIcon
     };
     var endpoint = '/api/add-task';

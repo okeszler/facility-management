@@ -4,7 +4,7 @@ export async function onRequestPost(context) {
   const db = context.env.DB;
   try {
     const body = await context.request.json();
-    const { name, category, interval, icon, oneOff, user } = body || {};
+    const { name, category, interval, assignee, icon, oneOff, user } = body || {};
     if (!name || !String(name).trim()) return errorResponse('Bitte einen Aufgabennamen angeben.');
 
     const id = 'T' + Date.now();
@@ -13,9 +13,9 @@ export async function onRequestPost(context) {
     await db
       .prepare(
         `INSERT INTO tasks (id, category, name, interval_days, assignee, due_date, icon, active, one_off)
-         VALUES (?1, ?2, ?3, ?4, '', ?5, ?6, 1, ?7)`
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 1, ?8)`
       )
-      .bind(id, category || 'Sonstiges', name, safeInterval, todayStr(), icon || '🧹', oneOff ? 1 : 0)
+      .bind(id, category || 'Sonstiges', name, safeInterval, assignee || '', todayStr(), icon || '🧹', oneOff ? 1 : 0)
       .run();
 
     await logAction(db, id, name, oneOff ? 'hinzugefügt (einmalig)' : 'hinzugefügt', user);
