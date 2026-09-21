@@ -418,11 +418,12 @@
     border-top: 1px solid var(--line); flex-wrap: wrap;
   }
   .dm-drag {
-    flex: 0 0 auto; width: 26px; height: 34px; display: flex; align-items: center; justify-content: center;
-    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; margin: -4px 0;
+    flex: 0 0 auto; align-self: stretch; width: 22px; display: flex; align-items: center; justify-content: center;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
   }
   .dm-drag::before {
     content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--muted);
+    transform: translate(-4px, -5px);
     box-shadow:
       8px 0 0 var(--muted),
       0 5px 0 var(--muted),
