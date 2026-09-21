@@ -432,6 +432,24 @@
   .dish-manage-row {
     display: flex; align-items: center; gap: 8px; padding: 9px 2px;
     border-top: 1px solid var(--line); flex-wrap: wrap;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .dm-drag {
+    flex: 0 0 auto; width: 26px; height: 34px; display: flex; align-items: center; justify-content: center;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; margin: -4px 0;
+  }
+  .dm-drag::before {
+    content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--muted);
+    box-shadow:
+      8px 0 0 var(--muted),
+      0 5px 0 var(--muted),
+      8px 5px 0 var(--muted),
+      0 10px 0 var(--muted),
+      8px 10px 0 var(--muted);
+  }
+  .dish-manage-row.dragging {
+    background: var(--card); border-radius: var(--radius); border: 1px solid var(--line);
+    padding: 9px 10px;
   }
   .dish-manage-row:first-child { border-top: none; }
   .dish-manage-row .dm-icon { font-size: 19px; width: 22px; text-align: center; flex: 0 0 auto; }
@@ -473,11 +491,11 @@
     transition: transform .18s ease, box-shadow .18s ease;
   }
   .shop-item.checked { opacity: .55; }
-  .shop-item.dragging {
+  .dragging {
     opacity: .95; box-shadow: 0 10px 26px rgba(0,0,0,.45); cursor: grabbing;
     transform: scale(1.03);
   }
-  .shop-drag-placeholder {
+  .drag-placeholder {
     border: 2px dashed var(--accent); border-radius: var(--radius);
     background: var(--accent-soft); margin-bottom: 8px;
   }
@@ -1201,14 +1219,13 @@
     var host = document.getElementById('dishManageList');
     if (!host) return;
     var list = MEALS.dishes || [];
-    var html = list.map(function(d, i) {
-      return '<div class="dish-manage-row">' +
+    var html = list.map(function(d) {
+      return '<div class="dish-manage-row" data-id="' + d.id + '">' +
+        '<span class="dm-drag" aria-hidden="true"></span>' +
         '<span class="dm-icon">' + esc(d.icon) + '</span>' +
         '<span class="health-dot health-' + esc(d.health || 'yellow') + '" title="Gesundheitsampel"></span>' +
         '<span class="dm-name">' + esc(d.name) + '</span>' +
         '<div class="dm-actions">' +
-          '<button class="dm-btn"' + (i === 0 ? ' disabled' : '') + ' onclick="reorderDish(\'' + d.id + '\',\'up\')" title="Nach oben">▲</button>' +
-          '<button class="dm-btn"' + (i === list.length - 1 ? ' disabled' : '') + ' onclick="reorderDish(\'' + d.id + '\',\'down\')" title="Nach unten">▼</button>' +
           '<button class="dm-btn" onclick="startEditDish(\'' + d.id + '\')" title="Bearbeiten">✏️</button>' +
           '<button class="dm-btn danger" onclick="deleteDish(\'' + d.id + '\')" title="Löschen">🗑️</button>' +
         '</div></div>';
@@ -1241,12 +1258,6 @@
         renderDishManageList();
         toast('🗑️ Gericht gelöscht');
       })
-      .catch(function(err) { toast('⚠️ ' + err.message); });
-  }
-
-  function reorderDish(id, direction) {
-    callApi('/api/dishes-reorder', { id: id, direction: direction })
-      .then(function(data) { MEALS = data; renderDishManageList(); })
       .catch(function(err) { toast('⚠️ ' + err.message); });
   }
 
@@ -1667,36 +1678,36 @@
       .catch(function(err) { toast('⚠️ ' + err.message); });
   }
 
-  /* ---------- Einkaufsliste: Drag & Drop ---------- */
-  function initShopDrag() {
-    var host = document.getElementById('shoppingList');
+  /* ---------- Wiederverwendbares Drag & Drop (Einkaufsliste, Gerichte) ---------- */
+  function initDragReorder(hostId, itemSelector, handleSelector, onDrop) {
+    var host = document.getElementById(hostId);
+    if (!host) return;
     host.addEventListener('pointerdown', function(e) {
-      var handle = e.target.closest('.shop-drag');
+      var handle = e.target.closest(handleSelector);
       if (!handle) return;
-      var item = handle.closest('.shop-item');
+      var item = handle.closest(itemSelector);
       if (!item) return;
       e.preventDefault();
-      startShopDrag(item, handle, e);
+      startRowDrag(host, item, handle, itemSelector, e, onDrop);
     });
   }
 
-  function startShopDrag(item, handle, startEvent) {
-    var host = document.getElementById('shoppingList');
+  function startRowDrag(host, item, handle, itemSelector, startEvent, onDrop) {
     var pointerId = startEvent.pointerId;
     try { handle.setPointerCapture(pointerId); } catch (e) {}
 
-    var others = Array.prototype.slice.call(host.querySelectorAll('.shop-item')).filter(function(el) { return el !== item; });
+    var others = Array.prototype.slice.call(host.querySelectorAll(itemSelector)).filter(function(el) { return el !== item; });
     var startY = startEvent.clientY;
     var rect = item.getBoundingClientRect();
     var moved = false;
 
-    // Die Einblend-Animation (meal-in, fill-mode "both") friert transform sonst
+    // Eine etwaige Einblend-Animation (fill-mode "both") friert transform sonst
     // dauerhaft ein und blockiert jede spätere Transform-Änderung per JS/Klasse.
     item.style.animation = 'none';
     others.forEach(function(el) { el.style.animation = 'none'; });
 
     var placeholder = document.createElement('div');
-    placeholder.className = 'shop-drag-placeholder';
+    placeholder.className = 'drag-placeholder';
     placeholder.style.height = rect.height + 'px';
     item.parentNode.insertBefore(placeholder, item.nextSibling);
 
@@ -1778,10 +1789,10 @@
       });
 
       if (!moved) return;
-      var newOrder = Array.prototype.map.call(host.querySelectorAll('.shop-item'), function(el) {
+      var newOrder = Array.prototype.map.call(host.querySelectorAll(itemSelector), function(el) {
         return el.getAttribute('data-id');
       });
-      persistShopOrder(newOrder);
+      onDrop(newOrder);
     }
 
     handle.addEventListener('pointermove', onMove);
@@ -1793,6 +1804,12 @@
     callApi('/api/shopping-order', { ids: ids })
       .then(function(d) { SHOPPING = d; renderShoppingList(); })
       .catch(function(err) { toast('⚠️ ' + err.message); loadShopping(); });
+  }
+
+  function persistDishOrder(ids) {
+    callApi('/api/dishes-order', { ids: ids })
+      .then(function(d) { MEALS = d; renderMeals(); renderDishManageList(); })
+      .catch(function(err) { toast('⚠️ ' + err.message); renderDishManageList(); });
   }
 
   /* ---------- Ansichts-Umschalter (Putzplan / Speiseplan / Einkauf) ---------- */
@@ -1881,7 +1898,8 @@
   document.getElementById('viewMealsBtn').addEventListener('click', function() { setView('meals'); });
   document.getElementById('viewShoppingBtn').addEventListener('click', function() { setView('shopping'); });
   initSwipe();
-  initShopDrag();
+  initDragReorder('shoppingList', '.shop-item', '.shop-drag', persistShopOrder);
+  initDragReorder('dishManageList', '.dish-manage-row', '.dm-drag', persistDishOrder);
   var healthToggleEl = document.getElementById('healthToggle');
   healthToggleEl.checked = showHealth;
   healthToggleEl.addEventListener('change', function() {
