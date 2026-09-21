@@ -480,11 +480,12 @@
     background: var(--accent-soft); margin-bottom: 8px;
   }
   .shop-drag {
-    flex: 0 0 auto; width: 30px; height: 44px; display: flex; align-items: center; justify-content: center;
-    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; margin: -7px 0;
+    flex: 0 0 auto; align-self: stretch; width: 26px; display: flex; align-items: center; justify-content: center;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
   }
   .shop-drag::before {
     content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--muted);
+    transform: translate(-5px, -6px);
     box-shadow:
       10px 0 0 var(--muted),
       0 6px 0 var(--muted),
