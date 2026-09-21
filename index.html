@@ -158,6 +158,10 @@
     background: var(--card); color: var(--accent); border: 2px solid var(--accent);
     padding: 8px 12px; font-size: 13px; min-width: auto;
   }
+  .btn.edit {
+    background: none; border: none; color: var(--muted); font-size: 15px;
+    padding: 3px 2px 0; min-width: auto; min-height: auto;
+  }
 
   /* ---------- Demnächst ---------- */
   .upcoming .card { opacity: .8; }
@@ -603,7 +607,7 @@
 
 <div class="modal-back" id="modalBack">
   <div class="modal">
-    <h2>Neue Aufgabe ✨</h2>
+    <h2 id="taskModalTitle">Neue Aufgabe ✨</h2>
     <div class="field">
       <label for="fName">Was ist zu tun?</label>
       <input id="fName" type="text" placeholder="z. B. Terrasse kehren" maxlength="80">
@@ -714,6 +718,7 @@
   var busy = {};
   var ICONS = ['🧹','🧽','🧺','🍽️','🚽','🛁','🪞','🌀','🪶','🪟','🧸','👕','🛏️','🗑️','♻️','🌿','🔥','🧊'];
   var pickedIcon = '🧹';
+  var editingTaskId = null;
   var CIRC = 2 * Math.PI * 31;
   var prevOpen = null;
   var suppressNextConfetti = false;
@@ -803,10 +808,12 @@
       ? '<span class="overdue-tag">' + (diff === -1 ? '1 Tag' : (-diff) + ' Tage') + ' überfällig</span>' : '';
     var oneOffTag = t.oneOff ? '<span>· einmalig</span>' : '';
     var right;
+    var editBtn = '<button class="btn edit" onclick="openEditTaskModal(\'' + t.id + '\')" title="Aufgabe bearbeiten">✏️</button>';
     if (mode === 'upcoming') {
       right = '<div class="actions">' +
         '<div class="due-info">' + weekday(t.due) + ' ' + niceDate(t.due) + '</div>' +
         '<button class="btn early" onclick="doAction(\'' + t.id + '\',\'complete\',true)">⏩ Jetzt erledigen</button>' +
+        editBtn +
         '</div>';
     } else {
       right = '<div class="actions">' +
@@ -814,6 +821,7 @@
         '<button class="btn later" onclick="doAction(\'' + t.id + '\',\'postpone\')">→ Morgen</button>' +
         '<button class="btn skip" onclick="doAction(\'' + t.id + '\',\'skip\')">⏭ Überspringen</button>' +
         '<button class="btn retro" onclick="openRetroModal(\'' + t.id + '\')">🕓 Rückwirkend erledigt</button>' +
+        editBtn +
         '</div>';
     }
     return '<div class="card" id="card-' + t.id + '" style="--d:' + (delay || 0) + 's">' +
@@ -1317,20 +1325,48 @@
     }
   }
 
-  /* ---------- Hinzufügen ---------- */
+  /* ---------- Hinzufügen / Bearbeiten ---------- */
   function openModal() {
+    editingTaskId = null;
+    pickedIcon = '🧹';
+    document.getElementById('taskModalTitle').textContent = 'Neue Aufgabe ✨';
+    document.getElementById('btnSave').textContent = 'Aufgabe speichern';
+    document.getElementById('fName').value = '';
+    fillTaskCategorySelect();
+    document.getElementById('fInt').value = 7;
+    renderTaskIconPick();
+    document.getElementById('modalBack').classList.add('open');
+    document.getElementById('fName').focus();
+  }
+  function openEditTaskModal(id) {
+    var t = DATA.tasks.filter(function(x) { return x.id === id; })[0];
+    if (!t) return;
+    editingTaskId = id;
+    pickedIcon = t.icon || '🧹';
+    document.getElementById('taskModalTitle').textContent = 'Aufgabe bearbeiten ✏️';
+    document.getElementById('btnSave').textContent = 'Änderungen speichern';
+    document.getElementById('fName').value = t.name;
+    fillTaskCategorySelect(t.category);
+    document.getElementById('fInt').value = t.interval;
+    renderTaskIconPick();
+    document.getElementById('modalBack').classList.add('open');
+    document.getElementById('fName').focus();
+  }
+  function fillTaskCategorySelect(selected) {
     var cats = {};
     DATA.tasks.forEach(function(t){ cats[t.category] = true; });
+    if (selected) cats[selected] = true;
     var catSel = document.getElementById('fCat');
     catSel.innerHTML = Object.keys(cats).sort().map(function(c) {
       return '<option>' + esc(c) + '</option>';
     }).join('') + '<option>Sonstiges</option>';
+    if (selected) catSel.value = selected;
+  }
+  function renderTaskIconPick() {
     var ip = document.getElementById('iconPick');
     ip.innerHTML = ICONS.map(function(ic) {
       return '<button class="' + (ic === pickedIcon ? 'sel' : '') + '" onclick="pickIcon(this,\'' + ic + '\')">' + ic + '</button>';
     }).join('');
-    document.getElementById('modalBack').classList.add('open');
-    document.getElementById('fName').focus();
   }
   function pickIcon(btn, ic) {
     pickedIcon = ic;
@@ -1339,6 +1375,7 @@
   }
   function closeModal() {
     document.getElementById('modalBack').classList.remove('open');
+    editingTaskId = null;
   }
 
   /* ---------- Einmalige Aufgabe ---------- */
@@ -1427,27 +1464,30 @@
   function saveTask() {
     var name = document.getElementById('fName').value.trim();
     if (!name) { toast('Bitte einen Namen eingeben'); return; }
+    var isEdit = !!editingTaskId;
     var obj = {
       name: name,
       category: document.getElementById('fCat').value,
       interval: Number(document.getElementById('fInt').value) || 7,
       icon: pickedIcon
     };
+    var endpoint = '/api/add-task';
+    if (isEdit) { obj.id = editingTaskId; endpoint = '/api/update-task'; }
     var btn = document.getElementById('btnSave');
     btn.disabled = true; btn.textContent = 'Wird gespeichert …';
     obj.user = currentUser || '';
-    callApi('/api/add-task', obj)
+    callApi(endpoint, obj)
       .then(function(data) {
         DATA = data;
-        sessionStorage.setItem('pp_total', 0); // Zähler neu kalibrieren
+        if (!isEdit) sessionStorage.setItem('pp_total', 0); // Zähler neu kalibrieren
         render();
         closeModal();
         document.getElementById('fName').value = '';
-        btn.disabled = false; btn.textContent = 'Aufgabe speichern';
-        toast('✨ Aufgabe hinzugefügt');
+        btn.disabled = false; btn.textContent = isEdit ? 'Änderungen speichern' : 'Aufgabe speichern';
+        toast(isEdit ? '✏️ Aufgabe aktualisiert' : '✨ Aufgabe hinzugefügt');
       })
       .catch(function(err) {
-        btn.disabled = false; btn.textContent = 'Aufgabe speichern';
+        btn.disabled = false; btn.textContent = isEdit ? 'Änderungen speichern' : 'Aufgabe speichern';
         toast('⚠️ ' + err.message);
       });
   }
