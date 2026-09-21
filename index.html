@@ -1719,6 +1719,13 @@
     item.style.width = rect.width + 'px';
     item.style.zIndex = 50;
     item.style.pointerEvents = 'none';
+    // #viewTrack bekommt beim Wechseln der Ansicht ein inline transform (für
+    // den Wisch-Effekt) – das macht es zum "containing block" für position:fixed
+    // und würde die gezogene Karte an der falschen Stelle rendern. Deshalb wird
+    // sie für die Dauer des Drags aus dem Baum raus direkt an <body> gehängt.
+    document.body.appendChild(item);
+    // Reparenting kann die Pointer Capture vom handle lösen -> danach erneut setzen.
+    try { handle.setPointerCapture(pointerId); } catch (e) {}
 
     var currentTarget; // undefined = not computed yet, null = append at end
 
