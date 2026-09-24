@@ -1,5 +1,10 @@
 -- Facility Management GW5 – D1-Schema
 -- Einmalig ausführen: wrangler d1 execute gw5 --remote --file=schema.sql
+--
+-- ⚠️ ACHTUNG: NUR BEI DER ERSTEINRICHTUNG! Die folgenden DROP TABLE-Befehle
+-- löschen auf einer bestehenden Datenbank ALLE Daten unwiderruflich
+-- (Aufgaben, Historie, Speiseplan, Einkaufsliste). Für Änderungen an einer
+-- laufenden Datenbank die passende migrate_*.sql verwenden.
 
 DROP TABLE IF EXISTS tasks;
 DROP TABLE IF EXISTS members;
@@ -48,8 +53,7 @@ CREATE TABLE dishes (
   name       TEXT NOT NULL,
   icon       TEXT NOT NULL DEFAULT '🍽️',
   active     INTEGER NOT NULL DEFAULT 1,
-  sort_order INTEGER NOT NULL DEFAULT 0,        -- manuelle Reihenfolge (rauf/runter in der App)
-  health     TEXT NOT NULL DEFAULT 'yellow'     -- Ampel: 'green' | 'yellow' | 'red'
+  sort_order INTEGER NOT NULL DEFAULT 0
 );
 
 -- Speiseplanung: welches Gericht an welchem Tag (yyyy-MM-dd)
@@ -105,14 +109,14 @@ INSERT INTO messages (for_name, text) VALUES
   ('Andreea', 'Ohne dich würde hier nichts laufen. Danke! 🌷');
 
 -- Gerichte (Startpool, in der App oder über D1/Sheets beliebig erweiterbar)
-INSERT INTO dishes (id, name, icon, active, sort_order, health) VALUES
-  ('D1000','Spaghetti Bolognese','🍝',1,0,'yellow'),
-  ('D1001','Schnitzel mit Kartoffelsalat','🍖',1,1,'red'),
-  ('D1002','Gemüsecurry mit Reis','🍛',1,2,'green'),
-  ('D1003','Pizza','🍕',1,3,'red'),
-  ('D1004','Kartoffelgratin','🥔',1,4,'yellow'),
-  ('D1005','Gebratener Fisch mit Salat','🐟',1,5,'green'),
-  ('D1006','Burger mit Pommes','🍔',1,6,'red'),
-  ('D1007','Gemüsesuppe','🍲',1,7,'green'),
-  ('D1008','Risotto','🍚',1,8,'yellow'),
-  ('D1009','Tacos','🌮',1,9,'yellow');
+INSERT INTO dishes (id, name, icon, active, sort_order) VALUES
+  ('D1000','Spaghetti Bolognese','🍝',1,0),
+  ('D1001','Schnitzel mit Kartoffelsalat','🍖',1,1),
+  ('D1002','Gemüsecurry mit Reis','🍛',1,2),
+  ('D1003','Pizza','🍕',1,3),
+  ('D1004','Kartoffelgratin','🥔',1,4),
+  ('D1005','Gebratener Fisch mit Salat','🐟',1,5),
+  ('D1006','Burger mit Pommes','🍔',1,6),
+  ('D1007','Gemüsesuppe','🍲',1,7),
+  ('D1008','Risotto','🍚',1,8),
+  ('D1009','Tacos','🌮',1,9);

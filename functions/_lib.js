@@ -106,10 +106,14 @@ export async function logAction(db, taskId, taskName, action, user, ts) {
 export async function buildFullData(db) {
   const today = todayStr();
 
+  // Pausiert = wiederkehrende Aufgabe mit active = 0. Inaktive Einmal-Aufgaben
+  // sind dagegen erledigt/verworfen und tauchen nirgends mehr auf.
   const taskRows = await db
-    .prepare('SELECT id, category, name, interval_days, assignee, due_date, icon, one_off FROM tasks WHERE active = 1')
+    .prepare(
+      'SELECT id, category, name, interval_days, assignee, due_date, icon, one_off, active FROM tasks WHERE active = 1 OR one_off = 0'
+    )
     .all();
-  const tasks = taskRows.results.map((r) => ({
+  const toTask = (r) => ({
     id: r.id,
     category: r.category || 'Sonstiges',
     name: r.name,
@@ -118,14 +122,16 @@ export async function buildFullData(db) {
     due: r.due_date || today,
     icon: r.icon || '🧹',
     oneOff: !!r.one_off
-  }));
+  });
+  const tasks = taskRows.results.filter((r) => r.active).map(toTask);
+  const pausedTasks = taskRows.results.filter((r) => !r.active).map(toTask);
 
   const memberRows = await db.prepare('SELECT name, color, emoji FROM members').all();
   const members = memberRows.results.map((r) => ({ name: r.name, color: r.color, emoji: r.emoji }));
 
   const stats = await computeStats(db);
 
-  return { tasks, members, today, stats };
+  return { tasks, pausedTasks, members, today, stats };
 }
 
 /**

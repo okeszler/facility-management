@@ -24,6 +24,12 @@ Ersetzt die bisherige Google-Apps-Script-Version durch:
    ```
    wrangler d1 execute gw5 --remote --file=schema.sql
    ```
+   > ⚠️ **ACHTUNG – nur bei der allerersten Einrichtung ausführen!**
+   > `schema.sql` beginnt mit `DROP TABLE` für alle Tabellen. Wird die Datei
+   > auf der laufenden Datenbank erneut ausgeführt, sind **alle Aufgaben,
+   > Erledigt-Historie, Speiseplan und Einkaufsliste unwiderruflich gelöscht**.
+   > Für Änderungen an einer bestehenden Datenbank immer die jeweilige
+   > `migrate_*.sql` verwenden.
 
 4. **Pages-Projekt erstellen & deployen:**
    ```
@@ -84,6 +90,29 @@ Bei einer komplett neuen DB reicht das normale `schema.sql` – das enthält
 
 **Tag ändern:** In der App bei einem Tag auf 🔀 tippen (würfelt ein anderes
 Gericht) oder auf ✏️ (gezielt ein Gericht aus dem Pool wählen).
+
+## Aufgaben pausieren / löschen
+
+Unter „Aufgaben bearbeiten“: ⏸️ pausiert eine wiederkehrende Aufgabe (taucht
+nicht mehr im Putzplan auf, bleibt aber gespeichert), ▶️ setzt sie fort (dann
+ab heute fällig), 🗑️ löscht sie endgültig. Die Erledigt-Historie bleibt in
+beiden Fällen erhalten.
+
+## Offline
+
+Ein Service Worker (`sw.js`) speichert die App und den zuletzt geladenen Stand.
+Ohne Netz öffnet sich die App trotzdem und zeigt einen „Offline“-Hinweis.
+In der Einkaufsliste kann man offline abhaken – das wird automatisch
+nachgeholt, sobald wieder Netz da ist. Alle anderen Änderungen brauchen eine
+Verbindung. Online wird immer zuerst der aktuelle Stand vom Server geladen.
+
+## Ernährungsampel entfernt
+
+Einmalig auf der laufenden Datenbank ausführen, um die nicht mehr genutzte
+Spalte zu löschen (Gerichte bleiben erhalten):
+```
+wrangler d1 execute gw5 --remote --file=migrate_drop_health.sql
+```
 
 ## Was sich strukturell ändert (gegenüber Apps Script)
 

@@ -103,9 +103,9 @@
   .card {
     background: var(--card); border-radius: var(--radius);
     border: 1px solid var(--line);
-    padding: 16px;
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 12px;
+    padding: 12px 14px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px;
+    margin-bottom: 10px;
     transition: opacity .5s var(--bounce), transform .5s var(--bounce);
     animation: card-in .5s var(--bounce) backwards;
     animation-delay: var(--d, 0s);
@@ -128,42 +128,47 @@
     100% { transform: scale(1.12) rotate(0deg); }
   }
   .card .icon {
-    width: 48px; height: 48px; border-radius: 12px; flex: 0 0 auto;
+    width: 42px; height: 42px; border-radius: 11px; flex: 0 0 auto;
     background: var(--bg); display: flex; align-items: center;
-    justify-content: center; font-size: 24px; font-weight: 800;
+    justify-content: center; font-size: 21px; font-weight: 800;
     transition: background .3s ease, transform .3s ease;
   }
   .card .icon.done-flash { transform: scale(1.12); }
-  .card .info { flex: 1 1 auto; min-width: 0; }
-  .card .name { font-weight: 700; font-size: 16.5px; line-height: 1.3; hyphens: auto; overflow-wrap: break-word; }
+  .card .info { flex: 1 1 0; min-width: 0; }
+  .card .name { font-weight: 700; font-size: 16px; line-height: 1.3; hyphens: auto; overflow-wrap: break-word; }
   .card .meta {
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    margin-top: 5px; font-size: 12.5px; color: var(--muted);
+    display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap;
+    margin-top: 3px; font-size: 12px; color: var(--muted);
     text-transform: uppercase; letter-spacing: .03em; font-weight: 700;
   }
   .overdue-tag { color: var(--warn); font-weight: 800; }
-  .card .actions { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; }
+  /* Fällige Karten: Buttons als eigene Zeile unter dem Namen (volle Breite für den Text). */
+  .card .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1 1 100%; }
   .btn {
-    border: none; border-radius: 10px; padding: 10px 14px;
-    font-family: inherit; font-weight: 800; font-size: 14px; cursor: pointer;
-    min-width: 96px; min-height: 40px;
+    border: none; border-radius: 10px; padding: 8px 6px;
+    font-family: inherit; font-weight: 800; font-size: 13.5px; cursor: pointer;
+    flex: 1 1 auto; min-height: 38px; white-space: nowrap;
   }
   .btn.done { background: var(--good); color: #fff; }
   .btn.later { background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
-  .btn.skip { background: var(--card); color: var(--warn); border: 1px solid var(--warn-soft); }
-  .btn.retro {
-    background: none; border: none; color: var(--muted); font-size: 12px;
-    font-weight: 700; padding: 3px 2px 0; min-width: auto; min-height: auto; text-decoration: underline;
+  .actions-break { flex: 0 0 100%; height: 0; }
+  /* Seltenere Aktionen als kleine Links in der zweiten Zeile. */
+  .btn.skip, .btn.retro {
+    flex: 0 0 auto; background: none; border: none; font-size: 12.5px; font-weight: 700;
+    padding: 2px; min-height: 28px; text-decoration: underline;
   }
+  .btn.skip { color: var(--warn); margin-right: auto; }
+  .btn.retro { color: var(--muted); }
   .btn:active { transform: scale(.96); }
+  /* "Nächste 7 Tage": einzeilig, kleiner Button rechts neben dem Text. */
+  .card .actions.inline { flex: 0 0 auto; }
   .btn.early {
-    background: var(--card); color: var(--accent); border: 2px solid var(--accent);
-    padding: 8px 12px; font-size: 13px; min-width: auto;
+    flex: 0 0 auto; background: var(--card); color: var(--accent); border: 2px solid var(--accent);
+    padding: 6px 12px; font-size: 13px; min-height: 36px;
   }
 
   /* ---------- Demnächst ---------- */
   .upcoming .card { opacity: .8; }
-  .upcoming .due-info { font-size: 12.5px; color: var(--muted); font-weight: 800; flex: 0 0 auto; text-align: right; text-transform: uppercase; }
 
   .empty {
     text-align: center; padding: 38px 16px; color: var(--muted);
@@ -285,6 +290,13 @@
     font-weight: 800; font-size: 15px; padding: 12px; cursor: pointer;
   }
   .message-banner-btn:active { transform: scale(.97); }
+
+  /* ---------- Offline-Hinweis ---------- */
+  .offline-pill {
+    background: var(--warn-soft); color: #fff; border: 1px solid var(--warn); border-radius: 12px;
+    padding: 9px 14px; margin-bottom: 14px; font-size: 13.5px; font-weight: 700; text-align: center;
+  }
+  .offline-pill[hidden] { display: none; }
 
   /* ---------- Wochenrückblick ---------- */
   .recap-banner {
@@ -439,6 +451,12 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .dish-manage-row .dm-actions { display: flex; gap: 4px; flex: 0 0 auto; }
+  .dm-meta { flex: 1 1 100%; padding-left: 30px; font-size: 12px; color: var(--muted); }
+  .dm-section {
+    margin: 14px 2px 2px; font-size: 12px; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .dish-manage-row.is-paused .dm-icon, .dish-manage-row.is-paused .dm-name { opacity: .5; }
   .dm-btn {
     width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line);
     background: var(--bg); color: var(--ink); font-size: 13px; cursor: pointer; padding: 0;
@@ -524,6 +542,7 @@
 <div class="wrap">
   <div id="loading"><div class="spin"></div>Facility Management GW5 wird geladen …</div>
   <div id="app" style="display:none">
+    <div class="offline-pill" id="offlinePill" hidden>📴 Offline – du siehst den zuletzt gespeicherten Stand</div>
     <div class="recap-banner" id="recapBanner" style="display:none"></div>
     <header>
       <div class="ring">
@@ -692,13 +711,22 @@
       ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
       : { method: 'GET' };
     return fetch(path, opts).then(function(r) {
+      // Der Service Worker markiert Antworten aus dem Offline-Cache.
+      setOffline(r.headers.get('X-From-Cache') === '1');
       return r.json().catch(function() { return {}; }).then(function(data) {
         if (!r.ok) throw new Error((data && data.error) || ('Serverfehler (' + r.status + ')'));
         return data;
       });
     }, function() {
-      throw new Error('Keine Verbindung – bitte gleich nochmal versuchen.');
+      setOffline(true);
+      var err = new Error('Keine Verbindung – bitte gleich nochmal versuchen.');
+      err.offline = true;
+      throw err;
     });
+  }
+  function setOffline(isOffline) {
+    var pill = document.getElementById('offlinePill');
+    if (pill) pill.hidden = !isOffline;
   }
   var currentUser = null;
   var busy = {};
@@ -791,16 +819,17 @@
       ? '<span class="overdue-tag">' + (diff === -1 ? '1 Tag' : (-diff) + ' Tage') + ' überfällig</span>' : '';
     var oneOffTag = t.oneOff ? '<span>· einmalig</span>' : '';
     var assigneeTag = t.assignee ? '<span>· ' + esc(t.assignee) + '</span>' : '';
+    var dueTag = mode === 'upcoming' ? '<span>· ' + weekday(t.due) + ' ' + niceDate(t.due) + '</span>' : '';
     var right;
     if (mode === 'upcoming') {
-      right = '<div class="actions">' +
-        '<div class="due-info">' + weekday(t.due) + ' ' + niceDate(t.due) + '</div>' +
-        '<button class="btn early" onclick="doAction(\'' + t.id + '\',\'complete\',true)">⏩ Jetzt erledigen</button>' +
+      right = '<div class="actions inline">' +
+        '<button class="btn early" onclick="doAction(\'' + t.id + '\',\'complete\',true)">⏩ Jetzt</button>' +
         '</div>';
     } else {
       right = '<div class="actions">' +
         '<button class="btn done" onclick="doAction(\'' + t.id + '\',\'complete\',false)">✓ Erledigt</button>' +
         '<button class="btn later" onclick="doAction(\'' + t.id + '\',\'postpone\')">→ Morgen</button>' +
+        '<span class="actions-break"></span>' +
         '<button class="btn skip" onclick="doAction(\'' + t.id + '\',\'skip\')">⏭ Überspringen</button>' +
         '<button class="btn retro" onclick="openRetroModal(\'' + t.id + '\')">🕓 Rückwirkend erledigt</button>' +
         '</div>';
@@ -809,7 +838,7 @@
       '<div class="icon">' + esc(t.icon) + '</div>' +
       '<div class="info">' +
         '<div class="name">' + esc(t.name) + '</div>' +
-        '<div class="meta"><span>' + esc(t.category) + '</span>' + assigneeTag + oneOffTag + overdueTag + '</div>' +
+        '<div class="meta"><span>' + esc(t.category) + '</span>' + assigneeTag + dueTag + oneOffTag + overdueTag + '</div>' +
       '</div>' + right + '</div>';
   }
 
@@ -1293,8 +1322,11 @@
     document.getElementById('modalBack').classList.add('open');
     document.getElementById('fName').focus();
   }
+  function findTask(id) {
+    return DATA.tasks.concat(DATA.pausedTasks || []).filter(function(x) { return x.id === id; })[0];
+  }
   function openEditTaskModal(id) {
-    var t = DATA.tasks.filter(function(x) { return x.id === id; })[0];
+    var t = findTask(id);
     if (!t) return;
     closeTaskManageModal();
     editingTaskId = id;
@@ -1318,34 +1350,68 @@
   function closeTaskManageModal() {
     document.getElementById('taskManageModalBack').classList.remove('open');
   }
+  function sortTasksForManage(list) {
+    return (list || []).slice().sort(function(a, b) {
+      return a.category === b.category ? a.name.localeCompare(b.name) : a.category.localeCompare(b.category);
+    });
+  }
+  function taskManageRow(t, paused) {
+    var metaParts = [t.category, t.oneOff ? 'einmalig' : t.interval + (t.interval === 1 ? ' Tag' : ' Tage')];
+    if (t.assignee) metaParts.push(t.assignee);
+    var pauseBtn = t.oneOff ? '' : paused
+      ? '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', false)" title="Fortsetzen">▶️</button>'
+      : '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', true)" title="Pausieren">⏸️</button>';
+    return '<div class="dish-manage-row' + (paused ? ' is-paused' : '') + '">' +
+      '<span class="dm-icon">' + esc(t.icon) + '</span>' +
+      '<span class="dm-name">' + esc(t.name) + '</span>' +
+      '<div class="dm-actions">' +
+        '<button class="dm-btn" onclick="openEditTaskModal(\'' + t.id + '\')" title="Bearbeiten">✏️</button>' +
+        pauseBtn +
+        '<button class="dm-btn danger" onclick="deleteTask(\'' + t.id + '\')" title="Löschen">🗑️</button>' +
+      '</div>' +
+      '<div class="dm-meta">' + esc(metaParts.join(' · ')) + '</div>' +
+    '</div>';
+  }
   function renderTaskManageList() {
     var host = document.getElementById('taskManageList');
     if (!host) return;
-    var list = (DATA.tasks || []).slice().sort(function(a, b) {
-      return a.category === b.category ? a.name.localeCompare(b.name) : a.category.localeCompare(b.category);
-    });
-    var html = list.map(function(t) {
-      var metaParts = [t.category, t.interval + (t.interval === 1 ? ' Tag' : ' Tage')];
-      if (t.assignee) metaParts.push(t.assignee);
-      return '<div class="dish-manage-row">' +
-        '<span class="dm-icon">' + esc(t.icon) + '</span>' +
-        '<span class="dm-name">' + esc(t.name) + '</span>' +
-        '<div class="dm-actions">' +
-          '<button class="dm-btn" onclick="openEditTaskModal(\'' + t.id + '\')" title="Bearbeiten">✏️</button>' +
-        '</div>' +
-        '<div style="flex:1 1 100%; padding-left:30px; font-size:12px; color:var(--muted);">' + esc(metaParts.join(' · ')) + '</div>' +
-      '</div>';
-    }).join('');
+    var html = sortTasksForManage(DATA.tasks).map(function(t) { return taskManageRow(t, false); }).join('');
+    var paused = sortTasksForManage(DATA.pausedTasks);
+    if (paused.length) {
+      html += '<div class="dm-section">⏸️ Pausiert (' + paused.length + ')</div>' +
+        paused.map(function(t) { return taskManageRow(t, true); }).join('');
+    }
     host.innerHTML = html || '<div class="empty" style="padding:20px 10px;">Noch keine Aufgaben.</div>';
+  }
+  function afterTaskListChange(data, msg) {
+    DATA = data;
+    sessionStorage.setItem('pp_total', 0);
+    suppressNextConfetti = true;
+    render();
+    renderTaskManageList();
+    toast(msg);
+  }
+  function setTaskPaused(id, paused) {
+    callApi('/api/task-pause', { id: id, paused: paused, user: currentUser || '' })
+      .then(function(data) { afterTaskListChange(data, paused ? '⏸️ Aufgabe pausiert' : '▶️ Wieder aktiv – ab heute fällig'); })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
+  }
+  function deleteTask(id) {
+    var t = findTask(id);
+    if (!window.confirm('„' + (t ? t.name : 'Diese Aufgabe') + '“ endgültig löschen?')) return;
+    callApi('/api/task-delete', { id: id, user: currentUser || '' })
+      .then(function(data) { afterTaskListChange(data, '🗑️ Aufgabe gelöscht'); })
+      .catch(function(err) { toast('⚠️ ' + err.message); });
   }
   function fillTaskCategorySelect(selected) {
     var cats = {};
-    DATA.tasks.forEach(function(t){ cats[t.category] = true; });
+    DATA.tasks.concat(DATA.pausedTasks || []).forEach(function(t){ cats[t.category] = true; });
     if (selected) cats[selected] = true;
+    cats['Sonstiges'] = true;
     var catSel = document.getElementById('fCat');
     catSel.innerHTML = Object.keys(cats).sort().map(function(c) {
       return '<option>' + esc(c) + '</option>';
-    }).join('') + '<option>Sonstiges</option>';
+    }).join('');
     if (selected) catSel.value = selected;
   }
   function fillTaskAssigneeSelect(selected) {
@@ -1511,10 +1577,45 @@
     return callApi('/api/shopping').then(function(d) { SHOPPING = d; renderShoppingList(); });
   }
 
+  /* Offline abgehakte Einträge: id -> gewünschter checked-Wert (pro Eintrag
+     nur der letzte Stand). Wird nachgeholt, sobald wieder Netz da ist. */
+  var SHOP_QUEUE_KEY = 'pp_shop_queue';
+  function readShopQueue() {
+    try { return JSON.parse(localStorage.getItem(SHOP_QUEUE_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function writeShopQueue(q) {
+    try { localStorage.setItem(SHOP_QUEUE_KEY, JSON.stringify(q)); } catch (e) {}
+  }
+  var shopFlushRunning = false;
+  function flushShopQueue() {
+    var q = readShopQueue();
+    var ids = Object.keys(q);
+    if (!ids.length || shopFlushRunning) return;
+    shopFlushRunning = true;
+    var chain = Promise.resolve();
+    ids.forEach(function(id) {
+      chain = chain.then(function() {
+        return callApi('/api/shopping-toggle', { id: id, checked: q[id] }).then(function(d) {
+          var cur = readShopQueue();
+          if (cur[id] === q[id]) { delete cur[id]; writeShopQueue(cur); }
+          SHOPPING = d;
+        });
+      });
+    });
+    chain
+      .then(function() { renderShoppingList(); toast('✅ Offline abgehakte Einträge synchronisiert'); })
+      .catch(function() {})
+      .then(function() { shopFlushRunning = false; });
+  }
+
   function renderShoppingList() {
     var host = document.getElementById('shoppingList');
     if (!host) return;
     var items = SHOPPING.items || [];
+    var pending = readShopQueue();
+    items.forEach(function(it) {
+      if (Object.prototype.hasOwnProperty.call(pending, it.id)) it.checked = pending[it.id];
+    });
     document.getElementById('shopCount').textContent = items.length;
     var html = items.map(function(it, i) {
       var delay = Math.min(i, 8) * 0.04;
@@ -1596,9 +1697,25 @@
   }
 
   function toggleShopItem(id) {
-    callApi('/api/shopping-toggle', { id: id })
-      .then(function(d) { SHOPPING = d; renderShoppingList(); })
-      .catch(function(err) { toast('⚠️ ' + err.message); });
+    var it = (SHOPPING.items || []).filter(function(x) { return x.id === id; })[0];
+    if (!it) return;
+    var next = !it.checked;
+    callApi('/api/shopping-toggle', { id: id, checked: next })
+      .then(function(d) {
+        var q = readShopQueue();
+        if (Object.prototype.hasOwnProperty.call(q, id)) { delete q[id]; writeShopQueue(q); }
+        SHOPPING = d;
+        renderShoppingList();
+      })
+      .catch(function(err) {
+        if (!err.offline) { toast('⚠️ ' + err.message); return; }
+        var q = readShopQueue();
+        q[id] = next;
+        writeShopQueue(q);
+        it.checked = next;
+        renderShoppingList();
+        toast('📴 Offline gespeichert – wird synchronisiert, sobald Netz da ist');
+      });
   }
 
   function deleteShopItem(id) {
@@ -1878,6 +1995,7 @@
       loadMyMessages(currentUser);
       loadMeals();
       loadShopping();
+      flushShopQueue();
     })
     .catch(function(err) {
       document.getElementById('loading').innerHTML = '⚠️ ' + esc(err.message);
@@ -1886,6 +2004,7 @@
   // App bleibt auf dem Handy oft tagelang offen: beim Zurückkehren neu laden,
   // damit "Heute" stimmt und Änderungen der anderen sichtbar werden.
   function refreshAll() {
+    flushShopQueue();
     callApi('/api/data')
       .then(function(data) {
         if (data.today !== DATA.today) { sessionStorage.setItem('pp_total', 0); prevOpen = null; }
@@ -1900,6 +2019,14 @@
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible' && DATA.today) refreshAll();
   });
+  window.addEventListener('online', function() { if (DATA.today) refreshAll(); });
+  window.addEventListener('offline', function() { setOffline(true); });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
+    });
+  }
 </script>
 </body>
 </html>
