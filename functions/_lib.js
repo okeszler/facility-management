@@ -3,9 +3,11 @@
 // überall explizit über Intl berechnet, genau wie zuvor die Skript-Zeitzone
 // in Apps Script.
 
+// en-CA liefert direkt "yyyy-MM-dd"
+const viennaDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna' });
+
 export function todayStr() {
-  // en-CA liefert direkt "yyyy-MM-dd"
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna' }).format(new Date());
+  return viennaDate.format(new Date());
 }
 
 export function addDays(dateStr, days) {
@@ -39,12 +41,17 @@ export function errorResponse(message, status) {
   return jsonResponse({ error: message }, status || 400);
 }
 
+// Deckt auch die "(einmalig)"-Varianten ab; "nicht erledigt …" zählt bewusst nicht.
+const DONE_PREFIXES = ['erledigt', 'vorgezogen erledigt', 'rückwirkend erledigt'];
+
 /** Liest Tages-/Wochenzähler und Team-Streak aus dem log-Table. */
 export async function computeStats(db) {
   const today = todayStr();
   const wStart = weekStart(today);
+  // Der log-Table wächst mit jeder Aktion – nur ein begrenztes Fenster lesen.
   const { results } = await db
-    .prepare('SELECT ts, action, user FROM log')
+    .prepare('SELECT ts, action, user FROM log WHERE ts >= ?1')
+    .bind(addDays(today, -400))
     .all();
 
   const todayCounts = {};
@@ -53,9 +60,11 @@ export async function computeStats(db) {
 
   for (const r of results) {
     const action = String(r.action || '');
-    const isDone = action === 'erledigt' || action === 'vorgezogen erledigt' || action.indexOf('rückwirkend erledigt') === 0;
-    if (!isDone) continue;
-    const day = String(r.ts).slice(0, 10);
+    if (!DONE_PREFIXES.some((p) => action.startsWith(p))) continue;
+    const when = new Date(r.ts);
+    if (isNaN(when)) continue;
+    // ts ist UTC; der Kalendertag muss in Wiener Zeit bestimmt werden.
+    const day = viennaDate.format(when);
     const user = String(r.user || '');
     daysWithActivity[day] = true;
     if (day === today && user) todayCounts[user] = (todayCounts[user] || 0) + 1;
@@ -171,14 +180,27 @@ export async function buildMealPlan(db, days) {
     daysOut.push({ date, dishId: dishId || null, dish: dishId ? dishMap[dishId] || null : null });
   }
 
-  for (const ins of inserts) {
-    await db
-      .prepare(
-        `INSERT INTO meal_plan (date, dish_id) VALUES (?1, ?2)
-         ON CONFLICT(date) DO UPDATE SET dish_id = excluded.dish_id`
+  if (inserts.length) {
+    // DO NOTHING + neu lesen: Hat eine parallele Anfrage (anderes Handy) den Tag
+    // schon ausgewürfelt, gilt deren Gericht – so zeigen alle Geräte dasselbe.
+    await db.batch(
+      inserts.map((ins) =>
+        db
+          .prepare('INSERT INTO meal_plan (date, dish_id) VALUES (?1, ?2) ON CONFLICT(date) DO NOTHING')
+          .bind(ins.date, ins.dishId)
       )
-      .bind(ins.date, ins.dishId)
-      .run();
+    );
+    const insDates = inserts.map((ins) => ins.date);
+    const stored = await db
+      .prepare(`SELECT date, dish_id FROM meal_plan WHERE date IN (${insDates.map((_, i) => '?' + (i + 1)).join(',')})`)
+      .bind(...insDates)
+      .all();
+    stored.results.forEach((r) => {
+      const day = daysOut.find((d) => d.date === r.date);
+      if (!day) return;
+      day.dishId = r.dish_id || null;
+      day.dish = r.dish_id ? dishMap[r.dish_id] || null : null;
+    });
   }
 
   return {
