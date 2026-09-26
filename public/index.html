@@ -935,7 +935,10 @@
   var LEAF_SHAPES = ['leaf-maple', 'leaf-beech', 'leaf-oak'];
   var LEAF_COLORS = ['#E8913A', '#D9553A', '#E9BC4C', '#C0702E', '#9DB35A', '#B8452F'];
   // Personenfarben passend zum Herbst (die Farben in der DB stammen noch vom lila Design).
-  var MEMBER_COLORS = { Oliver: '#E8913A', Andreea: '#D0677A' };
+  var MEMBER_COLORS = { Oliver: '#E8913A', Andreea: '#D0677A', Florian: '#9DB35A' };
+  // Nur der Auswahl-Knopf wird ausgeblendet – Person, Aufgaben und Daten bleiben
+  // unverändert. Zum Wiederanzeigen einfach den Namen hier entfernen.
+  var HIDDEN_MEMBER_BUTTONS = ['Florian'];
   var REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function memberColor(name) {
@@ -1199,6 +1202,7 @@
     var html = '';
     var weekCounts = (DATA.stats && DATA.stats.weekCounts) || {};
     DATA.members.forEach(function(m) {
+      if (HIDDEN_MEMBER_BUTTONS.indexOf(m.name) !== -1) return;
       var act = currentUser === m.name;
       var badge = weekBadge(weekCounts[m.name] || 0);
       html += '<button class="who-chip' + (act ? ' active' : '') + '"' +

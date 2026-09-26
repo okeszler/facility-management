@@ -78,7 +78,8 @@ CREATE TABLE shopping_items (
 -- Mitarbeiter
 INSERT INTO members (name, color, emoji) VALUES
   ('Oliver', '#6C3FA6', '🦉'),
-  ('Andreea', '#9B7FD9', '🌷');
+  ('Andreea', '#9B7FD9', '🌷'),
+  ('Florian', '#E8792E', '🎮');
 
 -- Aufgaben (Fällig-Datum wird beim ersten Aufruf der App via /api/seed-dates
 -- ohnehin nicht benötigt – hier direkt auf "heute" gesetzt via CURRENT_DATE)
@@ -87,19 +88,19 @@ INSERT INTO tasks (id, category, name, interval_days, assignee, due_date, icon, 
   ('T1001','Küche','Boden wischen',3,'Andreea',date('now'),'🧽',1,0),
   ('T1002','Küche','Kühlschrank auswischen',14,'Oliver',date('now'),'🧊',1,0),
   ('T1003','Küche','Backofen reinigen',30,'Andreea',date('now'),'🔥',1,0),
-  ('T1004','Badezimmer','Toilette',3,'',date('now'),'🚽',1,0),
-  ('T1005','Badezimmer','Waschbecken & Spiegel',3,'',date('now'),'🪞',1,0),
+  ('T1004','Badezimmer','Toilette',3,'Florian',date('now'),'🚽',1,0),
+  ('T1005','Badezimmer','Waschbecken & Spiegel',3,'Florian',date('now'),'🪞',1,0),
   ('T1006','Badezimmer','Badewanne / Dusche',7,'Oliver',date('now'),'🛁',1,0),
   ('T1007','Badezimmer','Boden wischen',7,'Andreea',date('now'),'🧴',1,0),
-  ('T1008','Wohnbereich','Staubsaugen',3,'',date('now'),'🌀',1,0),
-  ('T1009','Wohnbereich','Staub wischen',7,'',date('now'),'🪶',1,0),
+  ('T1008','Wohnbereich','Staubsaugen',3,'Florian',date('now'),'🌀',1,0),
+  ('T1009','Wohnbereich','Staub wischen',7,'Florian',date('now'),'🪶',1,0),
   ('T1010','Wohnbereich','Fenster putzen',60,'Oliver',date('now'),'🪟',1,0),
   ('T1011','Kinderzimmer','Aufräumen & Spielzeug',1,'Andreea',date('now'),'🧸',1,0),
-  ('T1012','Kinderzimmer','Staubsaugen',3,'',date('now'),'🌀',1,0),
+  ('T1012','Kinderzimmer','Staubsaugen',3,'Florian',date('now'),'🌀',1,0),
   ('T1013','Wäsche','Waschmaschine anwerfen',2,'Andreea',date('now'),'👕',1,0),
   ('T1014','Wäsche','Bettwäsche wechseln',14,'Oliver',date('now'),'🛏️',1,0),
   ('T1015','Sonstiges','Müll rausbringen',2,'Oliver',date('now'),'🗑️',1,0),
-  ('T1016','Sonstiges','Altpapier & Recycling',7,'',date('now'),'♻️',1,0);
+  ('T1016','Sonstiges','Altpapier & Recycling',7,'Florian',date('now'),'♻️',1,0);
 
 -- Botschaften (Platzhalter, direkt in D1 oder über die Studio-UI erweiterbar)
 INSERT INTO messages (for_name, text) VALUES
