@@ -115,6 +115,18 @@ Spalte zu löschen (Gerichte bleiben erhalten):
 wrangler d1 execute gw5 --remote --file=migrate_drop_health.sql
 ```
 
+## Florian entfernt
+
+Florian ist kein Mitarbeiter mehr. Für die bestehende Datenbank einmalig
+(z. B. in der D1-Konsole im Cloudflare-Dashboard) ausführen:
+
+```
+wrangler d1 execute gw5 --remote --file=migrate_remove_florian.sql
+```
+
+Seine Aufgaben bleiben erhalten und stehen danach auf „niemand Bestimmtes“ –
+in der App unter „Aufgaben bearbeiten“ neu zuteilen.
+
 ## Was sich strukturell ändert (gegenüber Apps Script)
 
 | Vorher (Apps Script)      | Jetzt (Cloudflare)                  |
