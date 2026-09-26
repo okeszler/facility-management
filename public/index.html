@@ -227,10 +227,6 @@
     display: flex; align-items: center; gap: 2px 12px; flex-wrap: wrap;
     margin-top: 3px; font-size: 13px; color: var(--muted); font-weight: 500; column-gap: 11px;
   }
-  .who-dot { display: inline-flex; align-items: center; gap: 5px; }
-  .who-dot::before {
-    content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--muted));
-  }
   .overdue-tag { color: var(--maple); font-weight: 700; }
 
   /* Runder Haken = erledigen (wie in der Einkaufsliste). 44px Trefferfläche. */
@@ -764,7 +760,9 @@
         <input id="fInt" type="number" min="1" max="365" value="7" inputmode="numeric">
       </div>
     </div>
-    <div class="field">
+    <!-- Zuständigkeit ist ausgeblendet; das Feld bleibt, damit beim Bearbeiten
+         der gespeicherte Wert unverändert mitgeschickt wird. -->
+    <div class="field" hidden>
       <label for="fAssignee">Zuständig</label>
       <select id="fAssignee"></select>
     </div>
@@ -1064,8 +1062,6 @@
     var overdueTag = diff < 0
       ? '<span class="overdue-tag">seit ' + (diff === -1 ? '1 Tag' : (-diff) + ' Tagen') + '</span>' : '';
     var oneOffTag = t.oneOff ? '<span>einmalig</span>' : '';
-    var assigneeTag = t.assignee
-      ? '<span class="who-dot" style="--dot:' + memberColor(t.assignee) + '">' + esc(t.assignee) + '</span>' : '';
     var dueTag = mode === 'upcoming' ? '<span>' + weekday(t.due) + ' ' + niceDate(t.due) + '</span>' : '';
     var statusCls = mode === 'upcoming' ? '' : (diff < 0 ? ' is-overdue' : ' is-today');
     var early = mode === 'upcoming';
@@ -1076,7 +1072,7 @@
       '<button class="task-check" aria-label="' + esc(label) + '" onclick="doAction(\'' + t.id + '\',\'complete\',' + early + ')">' + ic('check') + '</button>' +
       '<div class="info">' +
         '<div class="name"><span class="t-emoji" aria-hidden="true">' + esc(t.icon) + '</span>' + esc(t.name) + '</div>' +
-        '<div class="meta"><span>' + esc(t.category) + '</span>' + assigneeTag + dueTag + oneOffTag + overdueTag + '</div>' +
+        '<div class="meta"><span>' + esc(t.category) + '</span>' + dueTag + oneOffTag + overdueTag + '</div>' +
       '</div>' + more + '</div>';
   }
 
@@ -1618,7 +1614,6 @@
   }
   function taskManageRow(t, paused) {
     var metaParts = [t.category, t.oneOff ? 'einmalig' : t.interval + (t.interval === 1 ? ' Tag' : ' Tage')];
-    if (t.assignee) metaParts.push(t.assignee);
     var pauseBtn = t.oneOff ? '' : paused
       ? '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', false)" title="Fortsetzen" aria-label="Fortsetzen">' + ic('play') + '</button>'
       : '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', true)" title="Pausieren" aria-label="Pausieren">' + ic('pause') + '</button>';
