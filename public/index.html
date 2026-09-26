@@ -1210,12 +1210,12 @@
     var html = '';
     var solo = Math.ceil(count / 2);
     for (var i = 0; i < solo; i++) {
-      html += steamSpanHtml(i / solo, steamDuration(), rnd(-11, 11), rnd(-8, 8), rnd(-2, 2));
+      html += steamSpanHtml(i / solo, steamDuration(), rnd(-11, 11), rnd(-4, 4), rnd(-2, 2));
     }
     var clusters = Math.floor((count - solo) / STEAM_CLUSTER_SIZE);
     for (var c = 0; c < clusters; c++) {
       var cPhase = (c + .5) / clusters, cDur = steamDuration();
-      var cSx = rnd(-9, 9), cDx = (Math.random() < .5 ? -1 : 1) * rnd(4, 9);
+      var cSx = rnd(-9, 9), cDx = (Math.random() < .5 ? -1 : 1) * rnd(2, 4.5);
       for (var k = 0; k < STEAM_CLUSTER_SIZE; k++) {
         html += steamSpanHtml(cPhase + rnd(-.012, .012), cDur, cSx + rnd(-2, 2), cDx, rnd(-3.5, 3.5));
       }
