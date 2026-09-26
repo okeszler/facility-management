@@ -472,9 +472,9 @@
   @keyframes steam-rise {
     0%   { transform: translate(var(--sx), 2px) scale(.45); opacity: 0; }
     18%  { opacity: .20; }
-    55%  { transform: translate(var(--dx), -17px) scale(1); opacity: .13; }
+    55%  { transform: translate(calc(var(--sx) * 1.6 + var(--dx)), -19px) scale(1.15); opacity: .13; }
     85%  { opacity: .04; }
-    100% { transform: translate(calc(var(--dx) * -1), -29px) scale(1.6); opacity: 0; }
+    100% { transform: translate(calc(var(--sx) * 2.8 - var(--dx)), -34px) scale(1.9); opacity: 0; }
   }
   .meal-card .meal-icon.roll { animation: meal-icon-roll .85s cubic-bezier(.34,1.56,.64,1); }
   @keyframes meal-icon-roll {
@@ -1196,7 +1196,7 @@
     var html = '';
     for (var i = 0; i < count; i++) {
       var delay = (i * (STEAM_DURATION / count)).toFixed(2);
-      var sx = (((i % 5) - 2) * 3.74).toFixed(1);
+      var sx = (((i % 7) - 3) * 3.6).toFixed(1);
       var dx = ((((i * 7) % 11) - 5) * 1.1).toFixed(1);
       html += '<span style="animation-delay:' + delay + 's; --sx:' + sx + 'px; --dx:' + dx + 'px;"></span>';
     }
