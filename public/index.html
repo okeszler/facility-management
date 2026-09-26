@@ -560,9 +560,11 @@
     transition: transform .18s ease, box-shadow .18s ease, opacity .3s ease, background .3s ease;
   }
   .shop-item.checked { opacity: .55; background: rgba(45,37,27,.5); }
+  /* Gezogene Karte: gerade, links/rechts etwas breiter (per JS), deutlich abgehoben. */
   .dragging {
-    opacity: .97; box-shadow: 0 16px 34px rgba(0,0,0,.55); cursor: grabbing;
-    transform: scale(1.03) rotate(-1deg);
+    cursor: grabbing; background: var(--card-hi); border-color: var(--pumpkin);
+    box-shadow: 0 24px 50px rgba(0,0,0,.65), 0 8px 16px rgba(0,0,0,.4);
+    transition: left .2s var(--ease-out), width .2s var(--ease-out), box-shadow .2s ease, background .2s ease;
   }
   .drag-placeholder {
     border: 2px dashed var(--pumpkin); border-radius: var(--radius);
@@ -1927,7 +1929,6 @@
     placeholder.style.height = rect.height + 'px';
     item.parentNode.insertBefore(placeholder, item.nextSibling);
 
-    item.classList.add('dragging');
     item.style.position = 'fixed';
     item.style.left = rect.left + 'px';
     item.style.top = rect.top + 'px';
@@ -1941,6 +1942,12 @@
     document.body.appendChild(item);
     // Reparenting kann die Pointer Capture vom handle lösen -> danach erneut setzen.
     try { handle.setPointerCapture(pointerId); } catch (e) {}
+    // Erst an der Ausgangsposition fixieren, dann seitlich aufziehen -> sichtbarer "Heben"-Effekt.
+    void item.offsetWidth;
+    var grow = Math.max(0, Math.min(14, rect.left - 4, window.innerWidth - rect.right - 4));
+    item.classList.add('dragging');
+    item.style.left = (rect.left - grow) + 'px';
+    item.style.width = (rect.width + 2 * grow) + 'px';
 
     var currentTarget; // undefined = not computed yet, null = append at end
 
