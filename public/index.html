@@ -64,12 +64,12 @@
   }
   .brand-leaf { width: 16px; height: 16px; color: var(--pumpkin); vertical-align: -2px; margin-right: 6px; }
   :focus-visible { outline: 3px solid var(--quince); outline-offset: 2px; }
-  .wrap { position: relative; max-width: 640px; margin: 0 auto; padding: 14px 18px 18px; }
+  .wrap { position: relative; isolation: isolate; max-width: 640px; margin: 0 auto; padding: 14px 18px 18px; }
 
   /* ---------- Fallendes Laub (nur im Kopfbereich, stört die Listen nicht) ---------- */
   .leaf-sky {
     position: absolute; left: 0; right: 0; top: 0; height: 250px;
-    pointer-events: none; overflow: hidden; z-index: 0;
+    pointer-events: none; overflow: hidden; z-index: -1; /* hinter allem Inhalt */
     -webkit-mask-image: linear-gradient(#000 55%, transparent);
             mask-image: linear-gradient(#000 55%, transparent);
   }
