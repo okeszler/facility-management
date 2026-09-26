@@ -1,7 +1,7 @@
 // Offline-Unterstützung: App-Hülle + zuletzt geladene Daten werden gecacht.
 // Strategie überall "Netzwerk zuerst": online sieht man immer den neuesten
 // Stand (auch direkt nach einem Deploy), nur ohne Netz kommt der Cache.
-const CACHE = 'gw5-v1';
+const CACHE = 'gw5-v2';
 const SHELL = ['/', '/manifest.json', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 // Bei schlechtem Empfang nicht ewig auf das Netz warten.
 const NETWORK_TIMEOUT_MS = 4000;
