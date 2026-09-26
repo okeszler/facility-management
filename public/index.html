@@ -68,13 +68,13 @@
 
   /* ---------- Fallendes Laub (nur im Kopfbereich, stört die Listen nicht) ---------- */
   .leaf-sky {
-    position: absolute; left: 0; right: 0; top: 0; height: 250px;
+    position: absolute; left: 0; right: 0; top: 0; height: 330px;
     pointer-events: none; overflow: hidden; z-index: -1; /* hinter allem Inhalt */
     -webkit-mask-image: linear-gradient(#000 55%, transparent);
             mask-image: linear-gradient(#000 55%, transparent);
   }
   .leaf-fall {
-    position: absolute; top: -40px; left: var(--x);
+    position: absolute; top: -150px; left: var(--x); margin-left: -60px;
     animation: leaf-fall var(--dur) linear infinite; animation-delay: var(--delay);
   }
   .leaf-sway {
@@ -85,9 +85,9 @@
   .leaf-sway svg { width: 100%; height: 100%; display: block; }
   @keyframes leaf-fall {
     from { transform: translateY(0); opacity: 0; }
-    10% { opacity: .8; }
-    80% { opacity: .8; }
-    to { transform: translateY(300px); opacity: 0; }
+    10% { opacity: .5; }
+    80% { opacity: .5; }
+    to { transform: translateY(480px); opacity: 0; }
   }
   @keyframes leaf-sway {
     from { transform: translateX(-18px) rotate(-35deg); }
@@ -947,7 +947,7 @@
       var dur = rnd(22, 38);
       html += '<span class="leaf-fall" style="--x:' + ((i + rnd(.1, .9)) / 9 * 100).toFixed(1) + '%;' +
         '--dur:' + dur.toFixed(1) + 's;--delay:' + (-rnd(0, dur)).toFixed(1) + 's;">' +
-        '<span class="leaf-sway" style="--size:' + Math.round(rnd(20, 36)) + 'px;--c:' + pick(LEAF_COLORS) + ';' +
+        '<span class="leaf-sway" style="--size:' + Math.round(rnd(80, 144)) + 'px;--c:' + pick(LEAF_COLORS) + ';' +
         '--dur:' + dur.toFixed(1) + 's;--delay:' + (-rnd(0, 4)).toFixed(1) + 's;">' + leafSvg(pick(LEAF_SHAPES)) +
         '</span></span>';
     }
