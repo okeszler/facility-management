@@ -469,12 +469,16 @@
     background: rgba(244,235,220,.55); opacity: 0;
     animation: steam-rise 9.6s ease-in-out infinite;
   }
+  /* --dx = Drift nach links/rechts (pendelt), --jx = Abstand innerhalb eines
+     Wölkchens: zuerst eng beisammen, nach oben hin lösen sie sich auf. */
   @keyframes steam-rise {
-    0%   { transform: translate(var(--sx), 2px) scale(.45); opacity: 0; }
+    0%   { transform: translate(calc(var(--sx) + var(--jx)), 2px) scale(.45); opacity: 0; }
     18%  { opacity: .10; }
-    55%  { transform: translate(calc(var(--sx) * 1.25 + var(--dx) * .5), -19px) scale(1.15); opacity: .065; }
+    30%  { transform: translate(calc(var(--sx) * 1.1 + var(--dx) + var(--jx) * .4), -9px) scale(.9); }
+    55%  { transform: translate(calc(var(--sx) * 1.25 - var(--dx) * .7 + var(--jx) * .5), -19px) scale(1.15); opacity: .065; }
+    78%  { transform: translate(calc(var(--sx) * 1.4 + var(--dx) * .6 + var(--jx) * 1.6), -28px) scale(1.5); }
     85%  { opacity: .02; }
-    100% { transform: translate(calc(var(--sx) * 1.5 - var(--dx) * .5), -34px) scale(1.9); opacity: 0; }
+    100% { transform: translate(calc(var(--sx) * 1.5 - var(--dx) * .3 + var(--jx) * 2.4), -34px) scale(1.9); opacity: 0; }
   }
   .meal-card .meal-icon.roll { animation: meal-icon-roll .85s cubic-bezier(.34,1.56,.64,1); }
   @keyframes meal-icon-roll {
@@ -1192,13 +1196,28 @@
 
   /* ---------- Speiseplan ---------- */
   var STEAM_DURATION = 9.6;
+  // Die Hälfte der Bläschen steigt einzeln auf, die andere Hälfte in kleinen
+  // Wölkchen (gleicher Start, gleiche Drift, gleiches Tempo), die sich oben
+  // wieder auflösen. Jedes Bläschen bzw. Wölkchen steigt unterschiedlich schnell.
+  var STEAM_CLUSTER_SIZE = 6;
+  function steamSpanHtml(phase, dur, sx, dx, jx) {
+    return '<span style="animation-duration:' + dur.toFixed(2) + 's;animation-delay:' + (-phase * dur).toFixed(2) + 's;' +
+      '--sx:' + sx.toFixed(1) + 'px;--dx:' + dx.toFixed(1) + 'px;--jx:' + jx.toFixed(1) + 'px;"></span>';
+  }
+  function steamDuration() { return STEAM_DURATION * rnd(.65, 1.35); }
   function steamSpansHtml(count) {
     var html = '';
-    for (var i = 0; i < count; i++) {
-      var delay = (i * (STEAM_DURATION / count)).toFixed(2);
-      var sx = (((i % 7) - 3) * 3.6).toFixed(1);
-      var dx = ((((i * 7) % 11) - 5) * 1.1).toFixed(1);
-      html += '<span style="animation-delay:' + delay + 's; --sx:' + sx + 'px; --dx:' + dx + 'px;"></span>';
+    var solo = Math.ceil(count / 2);
+    for (var i = 0; i < solo; i++) {
+      html += steamSpanHtml(i / solo, steamDuration(), rnd(-11, 11), rnd(-8, 8), rnd(-2, 2));
+    }
+    var clusters = Math.floor((count - solo) / STEAM_CLUSTER_SIZE);
+    for (var c = 0; c < clusters; c++) {
+      var cPhase = (c + .5) / clusters, cDur = steamDuration();
+      var cSx = rnd(-9, 9), cDx = (Math.random() < .5 ? -1 : 1) * rnd(4, 9);
+      for (var k = 0; k < STEAM_CLUSTER_SIZE; k++) {
+        html += steamSpanHtml(cPhase + rnd(-.012, .012), cDur, cSx + rnd(-2, 2), cDx, rnd(-3.5, 3.5));
+      }
     }
     return html;
   }
