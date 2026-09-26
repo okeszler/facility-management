@@ -4,7 +4,7 @@
     {
       "name": "gw5-pages-dev",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["wrangler", "pages", "dev", ".", "--port", "8788"],
+      "runtimeArgs": ["wrangler", "pages", "dev", "public", "--port", "8788"],
       "port": 8788
     }
   ]

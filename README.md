@@ -1,7 +1,8 @@
 # Facility Management GW5 – Cloudflare-Version
 
 Ersetzt die bisherige Google-Apps-Script-Version durch:
-- **Cloudflare Pages** – Hosting von `index.html` + Icons/Manifest
+- **Cloudflare Pages** – Hosting des Ordners `public/` (`index.html`, `sw.js`, Icons/Manifest).
+  Nur dieser Ordner ist öffentlich; SQL-Dateien, README und `.claude/` bleiben privat.
 - **Cloudflare Pages Functions** (`/functions/api/*.js`) – ersetzt `Code.gs`
 - **Cloudflare D1** (SQLite-Datenbank) – ersetzt das Google Sheet
 
@@ -33,7 +34,7 @@ Ersetzt die bisherige Google-Apps-Script-Version durch:
 
 4. **Pages-Projekt erstellen & deployen:**
    ```
-   wrangler pages deploy . --project-name=gw5-facility-management
+   wrangler pages deploy public --project-name=gw5-facility-management
    ```
    Beim ersten Deploy fragt Wrangler nach Bestätigung, ein neues Projekt anzulegen.
 
@@ -44,7 +45,7 @@ Ersetzt die bisherige Google-Apps-Script-Version durch:
    - Variable name: `DB`
    - D1 database: `gw5`
    
-   Danach einmal neu deployen (`wrangler pages deploy .`), damit die
+   Danach einmal neu deployen (`wrangler pages deploy public`), damit die
    Bindung aktiv wird.
 
 6. Die ausgegebene `*.pages.dev`-URL öffnen – fertig. Für eine eigene
@@ -59,7 +60,7 @@ Ersetzt die bisherige Google-Apps-Script-Version durch:
 - **Neue Aufgaben/Mitarbeiter:** genauso über die D1-Tabellenansicht im
   Dashboard möglich, ganz ohne Code.
 - **Code-Änderungen:** einfach die Dateien anpassen und erneut
-  `wrangler pages deploy .` ausführen – kein manuelles "Bereitstellen"
+  `wrangler pages deploy public` ausführen – kein manuelles "Bereitstellen"
   mit Versionsverwaltung mehr nötig wie bei Apps Script.
 
 ## Speiseplanung (Erweiterung)
