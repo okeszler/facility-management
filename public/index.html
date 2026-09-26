@@ -473,11 +473,11 @@
      Wölkchens: zuerst eng beisammen, nach oben hin lösen sie sich auf. */
   @keyframes steam-rise {
     0%   { transform: translate(calc(var(--sx) + var(--jx)), 2px) scale(.45); opacity: 0; }
-    18%  { opacity: .10; }
+    18%  { opacity: .05; }
     30%  { transform: translate(calc(var(--sx) * 1.1 + var(--dx) + var(--jx) * .4), -9px) scale(.9); }
-    55%  { transform: translate(calc(var(--sx) * 1.25 - var(--dx) * .7 + var(--jx) * .5), -19px) scale(1.15); opacity: .065; }
+    55%  { transform: translate(calc(var(--sx) * 1.25 - var(--dx) * .7 + var(--jx) * .5), -19px) scale(1.15); opacity: .0325; }
     78%  { transform: translate(calc(var(--sx) * 1.4 + var(--dx) * .6 + var(--jx) * 1.6), -28px) scale(1.5); }
-    85%  { opacity: .02; }
+    85%  { opacity: .01; }
     100% { transform: translate(calc(var(--sx) * 1.5 - var(--dx) * .3 + var(--jx) * 2.4), -34px) scale(1.9); opacity: 0; }
   }
   .meal-card .meal-icon.roll { animation: meal-icon-roll .85s cubic-bezier(.34,1.56,.64,1); }
@@ -1229,7 +1229,7 @@
   function mealCardInnerHTML(day) {
     var isToday = day.date === MEALS.today;
     var isTomorrow = day.date === addDaysClient_(MEALS.today, 1);
-    var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(144) + '</div>' : '';
+    var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(288) + '</div>' : '';
     var dishHtml = day.dish
       ? '<div class="meal-icon">' + esc(day.dish.icon) + steamHtml + '</div>' +
         '<div class="meal-info"><div class="meal-name">' + esc(day.dish.name) + '</div></div>'
