@@ -471,10 +471,10 @@
   }
   @keyframes steam-rise {
     0%   { transform: translate(var(--sx), 2px) scale(.45); opacity: 0; }
-    18%  { opacity: .20; }
-    55%  { transform: translate(calc(var(--sx) * 1.6 + var(--dx)), -19px) scale(1.15); opacity: .13; }
-    85%  { opacity: .04; }
-    100% { transform: translate(calc(var(--sx) * 2.8 - var(--dx)), -34px) scale(1.9); opacity: 0; }
+    18%  { opacity: .10; }
+    55%  { transform: translate(calc(var(--sx) * 1.25 + var(--dx) * .5), -19px) scale(1.15); opacity: .065; }
+    85%  { opacity: .02; }
+    100% { transform: translate(calc(var(--sx) * 1.5 - var(--dx) * .5), -34px) scale(1.9); opacity: 0; }
   }
   .meal-card .meal-icon.roll { animation: meal-icon-roll .85s cubic-bezier(.34,1.56,.64,1); }
   @keyframes meal-icon-roll {
@@ -1210,7 +1210,7 @@
   function mealCardInnerHTML(day) {
     var isToday = day.date === MEALS.today;
     var isTomorrow = day.date === addDaysClient_(MEALS.today, 1);
-    var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(72) + '</div>' : '';
+    var steamHtml = (isToday && day.dish) ? '<div class="steam">' + steamSpansHtml(144) + '</div>' : '';
     var dishHtml = day.dish
       ? '<div class="meal-icon">' + esc(day.dish.icon) + steamHtml + '</div>' +
         '<div class="meal-info"><div class="meal-name">' + esc(day.dish.name) + '</div></div>'
