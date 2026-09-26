@@ -473,13 +473,13 @@
   /* --dx = Drift nach links/rechts (pendelt), --jx = Abstand innerhalb eines
      Wölkchens: zuerst eng beisammen, nach oben hin lösen sie sich auf. */
   @keyframes steam-rise {
-    0%   { transform: translate(calc(var(--sx) + var(--jx)), 2px) scale(.45); opacity: 0; }
+    0%   { transform: translate(calc(var(--sx) + var(--jx)), 2px) scale(.5); opacity: 0; }
     18%  { opacity: .12; }
-    30%  { transform: translate(calc(var(--sx) * 1.1 + var(--dx) + var(--jx) * .4), -12px) scale(.9); }
-    55%  { transform: translate(calc(var(--sx) * 1.25 - var(--dx) * .7 + var(--jx) * .5), -25px) scale(1.15); opacity: .08; }
-    78%  { transform: translate(calc(var(--sx) * 1.4 + var(--dx) * .6 + var(--jx) * 1.6), -36px) scale(1.5); }
+    30%  { transform: translate(calc(var(--sx) * 1.1 + var(--dx) + var(--jx) * .4), -12px) scale(.95); }
+    55%  { transform: translate(calc(var(--sx) * 1.25 - var(--dx) * .7 + var(--jx) * .5), -25px) scale(1.45); opacity: .08; }
+    78%  { transform: translate(calc(var(--sx) * 1.4 + var(--dx) * .6 + var(--jx) * 1.6), -36px) scale(2); }
     85%  { opacity: .025; }
-    100% { transform: translate(calc(var(--sx) * 1.5 - var(--dx) * .3 + var(--jx) * 2.4), -44px) scale(1.9); opacity: 0; }
+    100% { transform: translate(calc(var(--sx) * 1.5 - var(--dx) * .3 + var(--jx) * 2.4), -44px) scale(2.6); opacity: 0; }
   }
   .meal-card .meal-icon.roll { animation: meal-icon-roll .85s cubic-bezier(.34,1.56,.64,1); }
   @keyframes meal-icon-roll {
