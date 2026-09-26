@@ -57,6 +57,12 @@
     min-height: 100vh;
   }
   button { font-family: inherit; }
+  [hidden] { display: none !important; }
+  .ic {
+    width: 1.15em; height: 1.15em; flex: 0 0 auto; vertical-align: -.2em;
+    fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .brand-leaf { width: 16px; height: 16px; color: var(--pumpkin); vertical-align: -2px; margin-right: 6px; }
   :focus-visible { outline: 3px solid var(--quince); outline-offset: 2px; }
   .wrap { position: relative; max-width: 640px; margin: 0 auto; padding: 14px 18px 18px; }
 
@@ -118,7 +124,7 @@
     font-variation-settings: 'wdth' 90; margin-top: 2px;
   }
   .streak {
-    display: inline-flex; align-items: center; gap: 5px;
+    display: inline-flex; align-items: center; gap: 4px;
     font-size: 14px; font-weight: 700; color: var(--quince);
     margin-top: 5px;
   }
@@ -147,6 +153,7 @@
     border-radius: 999px; padding: 4px; margin-bottom: 20px;
   }
   .view-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     flex: 1 1 0; border: none; background: none; color: var(--muted);
     font-weight: 700; font-size: 14px; padding: 10px 6px;
     border-radius: 999px; cursor: pointer; min-height: 44px;
@@ -161,10 +168,12 @@
 
   /* ---------- Abschnitte ---------- */
   .section-title {
-    display: flex; align-items: baseline; gap: 8px;
+    display: flex; align-items: center; gap: 8px;
     font-size: 19px; font-weight: 800; letter-spacing: -.01em; color: var(--ink);
     margin: 26px 2px 12px;
   }
+  .section-title .ic { width: 20px; height: 20px; color: var(--pumpkin); }
+  .section-title.overdue .ic { color: var(--maple); }
   .section-title .count {
     font-size: 15px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums;
   }
@@ -176,9 +185,9 @@
     position: relative; overflow: hidden;
     background: var(--card); border-radius: var(--radius);
     border: 1px solid var(--line); box-shadow: var(--shadow);
-    padding: 12px 14px 12px 18px;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px;
-    margin-bottom: 10px;
+    padding: 10px 10px 10px 16px; min-height: 64px;
+    display: flex; align-items: center; gap: 9px;
+    margin-bottom: 8px;
     transition: opacity .5s var(--ease-out), transform .55s var(--ease-out);
     animation: card-in .55s var(--ease-out) backwards;
     animation-delay: var(--d, 0s);
@@ -197,63 +206,60 @@
     from { opacity: 0; transform: translateY(14px) rotate(-.6deg); }
   }
   .card.leaving { opacity: 0; transform: translate(60px, 10px) rotate(6deg) scale(.94); }
-  .card .icon {
-    width: 44px; height: 44px; border-radius: 14px; flex: 0 0 auto;
-    background: var(--bg); display: flex; align-items: center;
-    justify-content: center; font-size: 22px; font-weight: 800;
-    transition: background .3s ease, transform .3s ease, color .3s ease;
-  }
-  .card .icon.done-flash {
-    background: var(--moss); color: var(--on-accent); transform: scale(1.12);
-    animation: icon-pop .5s var(--bounce);
-    box-shadow: 0 0 0 8px rgba(157,179,90,.2);
-  }
-  @keyframes icon-pop {
-    0% { transform: scale(1) rotate(0deg); }
-    45% { transform: scale(1.35) rotate(-10deg); }
-    100% { transform: scale(1.12) rotate(0deg); }
-  }
+  .card .t-emoji { font-size: 15px; margin-right: 7px; }
   .card .info { flex: 1 1 0; min-width: 0; }
   .card .name { font-weight: 700; font-size: 16.5px; line-height: 1.25; hyphens: auto; overflow-wrap: break-word; }
   .card .meta {
-    display: flex; align-items: center; gap: 3px 12px; flex-wrap: wrap;
-    margin-top: 4px; font-size: 13px; color: var(--muted); font-weight: 500;
+    display: flex; align-items: center; gap: 2px 12px; flex-wrap: wrap;
+    margin-top: 3px; font-size: 13px; color: var(--muted); font-weight: 500; column-gap: 11px;
   }
   .who-dot { display: inline-flex; align-items: center; gap: 5px; }
   .who-dot::before {
     content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--muted));
   }
   .overdue-tag { color: var(--maple); font-weight: 700; }
-  /* Fällige Karten: Buttons als eigene Zeile unter dem Namen (volle Breite für den Text). */
-  .card .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1 1 100%; }
-  .btn {
-    border: none; border-radius: 12px; padding: 8px 8px;
-    font-weight: 700; font-size: 14px; cursor: pointer;
-    flex: 1 1 auto; min-height: 40px; white-space: nowrap;
-    transition: transform .15s ease, filter .2s ease;
+
+  /* Runder Haken = erledigen (wie in der Einkaufsliste). 44px Trefferfläche. */
+  .task-check {
+    position: relative; flex: 0 0 auto; width: 44px; height: 44px; margin: -4px -4px -4px -6px;
+    border: none; background: none; padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: var(--on-accent);
   }
-  .btn.done { background: var(--moss); color: var(--on-accent); }
-  .btn.later { background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
-  .actions-break { flex: 0 0 100%; height: 0; }
-  /* Seltenere Aktionen als kleine Links in der zweiten Zeile. */
-  .btn.skip, .btn.retro {
-    flex: 0 0 auto; background: none; border: none; font-size: 13px; font-weight: 600;
-    padding: 2px; min-height: 28px; text-decoration: underline; text-underline-offset: 3px;
-    text-decoration-thickness: 1px;
+  .task-check::before {
+    content: ''; position: absolute; width: 30px; height: 30px; border-radius: 50%;
+    border: 2px solid var(--muted); background: transparent;
+    transition: background .25s ease, border-color .25s ease, transform .35s var(--bounce);
   }
-  .btn.skip { color: var(--muted); margin-right: auto; }
-  .btn.retro { color: var(--muted); }
-  .btn:active { transform: scale(.95); }
-  /* "Nächste 7 Tage": einzeilig, kleiner Button rechts neben dem Text. */
-  .card .actions.inline { flex: 0 0 auto; }
-  .btn.early {
-    flex: 0 0 auto; background: none; color: var(--pumpkin); border: 1.5px solid currentColor;
-    padding: 6px 12px; font-size: 13.5px; min-height: 36px; border-radius: 999px;
+  .card.is-overdue .task-check::before { border-color: var(--maple); }
+  .card.is-today .task-check::before { border-color: var(--pumpkin); }
+  .task-check .ic { position: relative; width: 17px; height: 17px; stroke-width: 3; opacity: 0; transform: scale(.4); transition: opacity .2s ease, transform .35s var(--bounce); }
+  .task-check:active::before { transform: scale(.88); }
+  .task-check.done-flash::before { background: var(--moss); border-color: var(--moss); transform: scale(1.12); }
+  .task-check.done-flash .ic { opacity: 1; transform: scale(1); }
+  .task-more {
+    flex: 0 0 auto; width: 34px; height: 44px; margin-right: -4px; border-radius: 12px;
+    border: none; background: none; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
   }
+  .task-more .ic { width: 22px; height: 22px; }
+  .task-more:active { background: var(--bg); }
+
+  /* Aktionsmenü (Bottom Sheet) */
+  .sheet-list { display: flex; flex-direction: column; gap: 6px; }
+  .sheet-btn {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    min-height: 54px; padding: 10px 14px; border-radius: 14px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    font-size: 16px; font-weight: 700; cursor: pointer;
+  }
+  .sheet-btn .ic { width: 22px; height: 22px; color: var(--pumpkin); flex: 0 0 auto; }
+  .sheet-btn small { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 1px; }
+  .sheet-btn:active { background: var(--card-hi); }
 
   /* ---------- Demnächst ---------- */
   .upcoming .card { background: rgba(45,37,27,.6); box-shadow: none; }
-  .upcoming .card .icon { opacity: .75; }
+  .upcoming .card .t-emoji { opacity: .8; }
+  .upcoming .task-check::before { border-style: dashed; }
 
   .empty {
     text-align: center; padding: 34px 16px; color: var(--muted);
@@ -264,12 +270,14 @@
   /* ---------- 1x-Aufgabe ---------- */
   .top-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
   .oneoff-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     flex: 1 1 140px; min-width: 0; min-height: 44px; padding: 9px 12px; border-radius: 999px;
     background: none; cursor: pointer;
     font-weight: 700; font-size: 14px; color: var(--ink);
     border: 1.5px solid var(--line); line-height: 1.25; white-space: normal;
     transition: border-color .2s ease, background .2s ease;
   }
+  .oneoff-btn .ic { color: var(--pumpkin); }
   .oneoff-btn:active { background: var(--card); border-color: var(--pumpkin); }
 
   /* ---------- Hinzufügen ---------- */
@@ -491,6 +499,18 @@
     width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line);
     background: var(--bg); color: var(--ink); font-size: 16px; cursor: pointer;
   }
+  .meal-icon-btn, .dm-btn, .recap-close, .fab, .shop-add-row button, .shop-check { display: inline-flex; align-items: center; justify-content: center; }
+  .meal-icon-btn .ic { width: 19px; height: 19px; }
+  .dm-btn .ic { width: 17px; height: 17px; }
+  .dm-btn.danger { color: #F2A48F; }
+  .fab .ic { width: 28px; height: 28px; stroke-width: 2.5; }
+  .shop-add-row button .ic { width: 22px; height: 22px; stroke-width: 2.5; }
+  .shop-check .ic { width: 15px; height: 15px; stroke-width: 3; opacity: 0; transform: scale(.4); transition: opacity .2s ease, transform .3s var(--bounce); }
+  .shop-item.checked .shop-check .ic { opacity: 1; transform: none; }
+  .shop-tag .ic { width: 13px; height: 13px; }
+  .shop-tag.aktion { color: var(--quince); }
+  .shop-tag.drogerie { color: var(--rosehip); }
+  .shop-tag.tk { color: #9CC3D5; }
   .meal-icon-btn:active { transform: scale(.92); }
 
   /* ---------- Gerichte / Aufgaben verwalten ---------- */
@@ -531,7 +551,7 @@
     background: var(--bg); color: var(--ink); font-size: 14px; cursor: pointer; padding: 0;
   }
   .dm-btn:disabled { opacity: .3; cursor: default; }
-  .dm-btn.danger { background: var(--warn-soft); color: var(--ink); border-color: var(--maple); }
+  .dm-btn.danger { background: var(--warn-soft); border-color: var(--maple); }
 
   /* ---------- Einkaufsliste ---------- */
   .shop-add-row { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -548,6 +568,7 @@
   .shop-add-row button.cancel-edit { background: var(--card); color: var(--muted); border: 1px solid var(--line); font-size: 18px; }
   .shop-tag-picker { display: flex; gap: 8px; margin: 0 0 14px; flex-wrap: wrap; }
   .shop-tag-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
     border: 1.5px solid var(--line); background: none; color: var(--muted);
     font-weight: 700; font-size: 13.5px; padding: 7px 13px;
     border-radius: 999px; cursor: pointer; transition: background .2s ease, color .2s ease, border-color .2s ease;
@@ -613,7 +634,29 @@
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24"><path d="m5 5 10 7-10 7Z"/><path d="M19 5v14"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m7 4 13 8-13 8Z"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M11 3 12.9 8.1 18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9Z"/><path d="M19 15v4M17 17h4"/></symbol>
+  <symbol id="i-utensils" viewBox="0 0 24 24"><path d="M4 3v7a3 3 0 0 0 6 0V3"/><path d="M7 3v18"/><path d="M20 15V3a5 5 0 0 0-5 5v6c0 .6.4 1 1 1h4Zm0 0v6"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><path d="M2.5 3.5h2.2l2.5 11.2h10.6L20.5 7H5.8"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.7s-6.5 7-6.5 11.5a6.5 6.5 0 0 0 13 0C18.5 9.7 12 2.7 12 2.7Z"/></symbol>
+  <symbol id="i-alarm" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M5 3 2 6M22 6l-3-3"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M16 3v4M8 3v4M3 10h18"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c.8 3.6 5.5 5.4 5.5 10.5a5.5 5.5 0 0 1-11 0c0-2.6 1.3-4 2.3-5.4.4 1.5 1.3 2.4 2.2 2.6C10.6 7.7 11 4.8 12 2.5Z"/></symbol>
   <symbol id="leaf-maple" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5l1.7 3.9 3.1-1.3-.7 3.6 3.8-.5-2.1 3.2 3.2 1.7-3.6 1.5 1.1 3-3.6-.9-.9 1.1H12.8v3.7h-1.6v-3.7H9.4l-.9-1.1-3.6.9 1.1-3-3.6-1.5L5.6 10 3.5 6.7l3.8.5-.7-3.6 3.1 1.3z"/></symbol>
   <symbol id="leaf-beech" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5C5.5 6.5 4.8 14.2 11.2 20.2V23h1.6v-2.8C19.2 14.2 18.5 6.5 12 1.5z"/><path d="M12 4.5v15M12 9l-3-2M12 9l3-2M12 13l-3.5-2M12 13l3.5-2M12 17l-3-2M12 17l3-2" stroke="rgba(0,0,0,.28)" stroke-width=".9" fill="none" stroke-linecap="round"/></symbol>
   <symbol id="leaf-oak" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5c1.9.6 1.4 2.4 2.9 2.7 1.6.3 2 1.8 1 2.9 1.5.4 2 1.9.9 3 1.4.6 1.5 2.2.2 3 1 .9.5 2.4-1 2.6-.5 1.2-1.8 1.5-3.2 1.4v5.4h-1.6v-5.4c-1.4.1-2.7-.2-3.2-1.4-1.5-.2-2-1.7-1-2.6-1.3-.8-1.2-2.4.2-3-1.1-1.1-.6-2.6.9-3-1-1.1-.6-2.6 1-2.9 1.5-.3 1-2.1 2.9-2.7z"/></symbol>
@@ -624,7 +667,7 @@
   <div id="app" style="display:none">
     <div class="offline-pill" id="offlinePill" hidden>📴 Offline – du siehst den zuletzt gespeicherten Stand</div>
     <div class="recap-banner" id="recapBanner" style="display:none"></div>
-    <div class="brand">🍂 Facility Management GW5</div>
+    <div class="brand"><svg class="brand-leaf"><use href="#leaf-maple"/></svg>Facility Management GW5</div>
     <header>
       <div class="ring">
         <svg width="72" height="72" viewBox="0 0 72 72">
@@ -636,45 +679,45 @@
       <div class="head-text">
         <div class="head-date" id="headDate"></div>
         <h1 id="subline"></h1>
-        <div class="streak" id="streakLine" style="display:none">🔥 <span id="streakNum"></span> Tage in Folge</div>
+        <div class="streak" id="streakLine" style="display:none"><svg class="ic"><use href="#i-flame"/></svg><span id="streakNum"></span> Tage in Folge</div>
       </div>
     </header>
 
     <div class="whoami" id="whoami"></div>
 
     <div class="view-switch" id="viewSwitch">
-      <button class="view-btn active" id="viewTasksBtn">🧹 Putzplan</button>
-      <button class="view-btn" id="viewMealsBtn">🍽️ Speiseplan</button>
-      <button class="view-btn" id="viewShoppingBtn">🛒 Einkauf</button>
+      <button class="view-btn active" id="viewTasksBtn"><svg class="ic"><use href="#i-sparkle"/></svg>Putzplan</button>
+      <button class="view-btn" id="viewMealsBtn"><svg class="ic"><use href="#i-utensils"/></svg>Speiseplan</button>
+      <button class="view-btn" id="viewShoppingBtn"><svg class="ic"><use href="#i-cart"/></svg>Einkauf</button>
     </div>
 
     <div class="view-port" id="viewPort">
       <div class="view-track" id="viewTrack">
         <div class="view-page">
           <div class="top-row">
-            <button class="oneoff-btn" id="addOneOffBtn">1× Einmalige Aufgabe</button>
+            <button class="oneoff-btn" id="addOneOffBtn">Einmalige Aufgabe</button>
             <button class="oneoff-btn" id="manageTasksBtn">Aufgaben bearbeiten</button>
           </div>
           <div id="sections"></div>
         </div>
         <div class="view-page">
-          <div class="section-title">🍽️ Speiseplan <span class="count">7 Tage</span></div>
+          <div class="section-title"><svg class="ic"><use href="#i-utensils"/></svg>Speiseplan <span class="count">7 Tage</span></div>
           <div class="meal-add-row">
             <button class="meal-add-link" id="addDishBtn">Gerichte verwalten</button>
           </div>
           <div id="mealPlan"></div>
         </div>
         <div class="view-page">
-          <div class="section-title">🛒 Einkaufsliste <span class="count" id="shopCount">0</span></div>
+          <div class="section-title"><svg class="ic"><use href="#i-cart"/></svg>Einkaufsliste <span class="count" id="shopCount">0</span></div>
           <div class="shop-add-row">
             <input type="text" id="shopInput" placeholder="z. B. 2x Zwiebeln" maxlength="80">
-            <button id="shopAddBtn" aria-label="Hinzufügen">+</button>
-            <button class="cancel-edit" id="shopCancelEditBtn" aria-label="Bearbeiten abbrechen" hidden>✕</button>
+            <button id="shopAddBtn" aria-label="Hinzufügen"><svg class="ic"><use href="#i-plus"/></svg></button>
+            <button class="cancel-edit" id="shopCancelEditBtn" aria-label="Bearbeiten abbrechen" hidden><svg class="ic"><use href="#i-x"/></svg></button>
           </div>
           <div class="shop-tag-picker">
-            <button type="button" class="shop-tag-toggle" id="tagAktionBtn">🏷️ Aktion</button>
-            <button type="button" class="shop-tag-toggle" id="tagTkBtn">❄️ TK</button>
-            <button type="button" class="shop-tag-toggle" id="tagDrogerieBtn">🧴 Drogerie</button>
+            <button type="button" class="shop-tag-toggle" id="tagAktionBtn"><svg class="ic"><use href="#i-tag"/></svg>Aktion</button>
+            <button type="button" class="shop-tag-toggle" id="tagTkBtn"><svg class="ic"><use href="#i-snow"/></svg>TK</button>
+            <button type="button" class="shop-tag-toggle" id="tagDrogerieBtn"><svg class="ic"><use href="#i-drop"/></svg>Drogerie</button>
           </div>
           <div id="shoppingList"></div>
         </div>
@@ -683,7 +726,7 @@
   </div>
 </div>
 
-<button class="fab" id="fabAdd" aria-label="Aufgabe hinzufügen">+</button>
+<button class="fab" id="fabAdd" aria-label="Aufgabe hinzufügen"><svg class="ic"><use href="#i-plus"/></svg></button>
 
 <div class="modal-back" id="modalBack">
   <div class="modal">
@@ -724,6 +767,19 @@
     </div>
     <button class="save" id="ooSave">Aufgabe speichern</button>
     <button class="cancel" id="ooCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="modal-back" id="taskActionsModalBack">
+  <div class="modal">
+    <h2 id="taskActionsTitle">Aufgabe</h2>
+    <div class="sheet-list">
+      <button class="sheet-btn" id="actPostpone"><svg class="ic"><use href="#i-arrow"/></svg><span>Auf morgen verschieben</span></button>
+      <button class="sheet-btn" id="actSkip"><svg class="ic"><use href="#i-skip"/></svg><span>Überspringen<small>Fällig erst wieder im nächsten Turnus</small></span></button>
+      <button class="sheet-btn" id="actRetro"><svg class="ic"><use href="#i-clock"/></svg><span>Rückwirkend erledigt …</span></button>
+      <button class="sheet-btn" id="actEdit"><svg class="ic"><use href="#i-pencil"/></svg><span>Bearbeiten</span></button>
+    </div>
+    <button class="cancel" id="taskActionsCancel">Abbrechen</button>
   </div>
 </div>
 
@@ -868,6 +924,9 @@
     var m = DATA.members.filter(function(x) { return x.name === name; })[0];
     return (m && m.color) || '#B4A68C';
   }
+  function ic(name) {
+    return '<svg class="ic" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
+  }
   function rnd(a, b) { return a + Math.random() * (b - a); }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function leafSvg(shape) {
@@ -980,32 +1039,22 @@
   function taskCard(t, mode, delay) {
     var diff = dayDiff(t.due, DATA.today);
     var overdueTag = diff < 0
-      ? '<span class="overdue-tag">' + (diff === -1 ? '1 Tag' : (-diff) + ' Tage') + ' überfällig</span>' : '';
+      ? '<span class="overdue-tag">seit ' + (diff === -1 ? '1 Tag' : (-diff) + ' Tagen') + '</span>' : '';
     var oneOffTag = t.oneOff ? '<span>einmalig</span>' : '';
     var assigneeTag = t.assignee
       ? '<span class="who-dot" style="--dot:' + memberColor(t.assignee) + '">' + esc(t.assignee) + '</span>' : '';
     var dueTag = mode === 'upcoming' ? '<span>' + weekday(t.due) + ' ' + niceDate(t.due) + '</span>' : '';
     var statusCls = mode === 'upcoming' ? '' : (diff < 0 ? ' is-overdue' : ' is-today');
-    var right;
-    if (mode === 'upcoming') {
-      right = '<div class="actions inline">' +
-        '<button class="btn early" onclick="doAction(\'' + t.id + '\',\'complete\',true)">⏩ Jetzt</button>' +
-        '</div>';
-    } else {
-      right = '<div class="actions">' +
-        '<button class="btn done" onclick="doAction(\'' + t.id + '\',\'complete\',false)">✓ Erledigt</button>' +
-        '<button class="btn later" onclick="doAction(\'' + t.id + '\',\'postpone\')">→ Morgen</button>' +
-        '<span class="actions-break"></span>' +
-        '<button class="btn skip" onclick="doAction(\'' + t.id + '\',\'skip\')">⏭ Überspringen</button>' +
-        '<button class="btn retro" onclick="openRetroModal(\'' + t.id + '\')">🕓 Rückwirkend erledigt</button>' +
-        '</div>';
-    }
+    var early = mode === 'upcoming';
+    var label = (early ? 'Jetzt schon erledigt: ' : 'Erledigt: ') + t.name;
+    var more = early ? '' :
+      '<button class="task-more" aria-label="Weitere Aktionen für ' + esc(t.name) + '" onclick="openTaskActions(\'' + t.id + '\')">' + ic('more') + '</button>';
     return '<div class="card' + statusCls + '" id="card-' + t.id + '" style="--d:' + (delay || 0) + 's">' +
-      '<div class="icon">' + esc(t.icon) + '</div>' +
+      '<button class="task-check" aria-label="' + esc(label) + '" onclick="doAction(\'' + t.id + '\',\'complete\',' + early + ')">' + ic('check') + '</button>' +
       '<div class="info">' +
-        '<div class="name">' + esc(t.name) + '</div>' +
+        '<div class="name"><span class="t-emoji" aria-hidden="true">' + esc(t.icon) + '</span>' + esc(t.name) + '</div>' +
         '<div class="meta"><span>' + esc(t.category) + '</span>' + assigneeTag + dueTag + oneOffTag + overdueTag + '</div>' +
-      '</div>' + right + '</div>';
+      '</div>' + more + '</div>';
   }
 
   function render() {
@@ -1028,10 +1077,10 @@
 
     var html = '';
     if (overdue.length) {
-      html += '<div class="section-title overdue">⏰ Überfällig <span class="count">' + overdue.length + '</span></div>';
+      html += '<div class="section-title overdue">' + ic('alarm') + 'Überfällig <span class="count">' + overdue.length + '</span></div>';
       overdue.forEach(function(t){ html += taskCard(t, 'due', nextDelay()); });
     }
-    html += '<div class="section-title">📌 Heute <span class="count">' + today.length + '</span></div>';
+    html += '<div class="section-title">' + ic('sun') + 'Heute <span class="count">' + today.length + '</span></div>';
     if (today.length) {
       today.forEach(function(t){ html += taskCard(t, 'due', nextDelay()); });
     } else if (!overdue.length) {
@@ -1040,7 +1089,7 @@
       html += '<div class="empty"><div class="big">👍</div>Für heute ist nichts Neues geplant.</div>';
     }
     if (upcoming.length) {
-      html += '<div class="upcoming"><div class="section-title">🗓️ Nächste 7 Tage <span class="count">' + upcoming.length + '</span></div>';
+      html += '<div class="upcoming"><div class="section-title">' + ic('calendar') + 'Nächste 7 Tage <span class="count">' + upcoming.length + '</span></div>';
       upcoming.forEach(function(t){ html += taskCard(t, 'upcoming', nextDelay()); });
       html += '</div>';
     }
@@ -1115,7 +1164,7 @@
     }).join('');
 
     el.innerHTML =
-      '<div class="recap-head">🌟 Wochenrückblick<button class="recap-close" onclick="dismissRecap()">✕</button></div>' +
+      '<div class="recap-head">🌟 Wochenrückblick<button class="recap-close" onclick="dismissRecap()" aria-label="Schließen">' + ic('x') + '</button></div>' +
       '<div class="recap-msg">' + esc(msg) + '</div>' + rows;
     el.style.display = 'block';
   }
@@ -1172,8 +1221,8 @@
       '<div class="meal-day">' + dayLabel + '</div>' +
       '<div class="meal-dish">' + dishHtml + '</div>' +
       '<div class="meal-actions">' +
-        '<button class="meal-icon-btn" title="Anderes Gericht auswürfeln" onclick="shuffleMeal(\'' + day.date + '\')">🎲</button>' +
-        '<button class="meal-icon-btn" title="Gericht wählen" onclick="openMealPick(\'' + day.date + '\')">✏️</button>' +
+        '<button class="meal-icon-btn" title="Anderes Gericht auswürfeln" aria-label="Anderes Gericht auswürfeln" onclick="shuffleMeal(\'' + day.date + '\')">' + ic('dice') + '</button>' +
+        '<button class="meal-icon-btn" title="Gericht wählen" aria-label="Gericht wählen" onclick="openMealPick(\'' + day.date + '\')">' + ic('pencil') + '</button>' +
       '</div>';
   }
 
@@ -1354,8 +1403,8 @@
         '<span class="dm-icon">' + esc(d.icon) + '</span>' +
         '<span class="dm-name">' + esc(d.name) + '</span>' +
         '<div class="dm-actions">' +
-          '<button class="dm-btn" onclick="startEditDish(\'' + d.id + '\')" title="Bearbeiten">✏️</button>' +
-          '<button class="dm-btn danger" onclick="deleteDish(\'' + d.id + '\')" title="Löschen">🗑️</button>' +
+          '<button class="dm-btn" onclick="startEditDish(\'' + d.id + '\')" title="Bearbeiten" aria-label="Bearbeiten">' + ic('pencil') + '</button>' +
+          '<button class="dm-btn danger" onclick="deleteDish(\'' + d.id + '\')" title="Löschen" aria-label="Löschen">' + ic('trash') + '</button>' +
         '</div></div>';
     }).join('');
     host.innerHTML = html || '<div class="empty" style="padding:20px 10px;">Noch keine Gerichte.</div>';
@@ -1424,12 +1473,12 @@
     }
 
     if (kind === 'complete' && card) {
-      var iconEl = card.querySelector('.icon');
-      if (iconEl) {
-        iconEl.textContent = '✓';
-        iconEl.classList.add('done-flash');
-        leafGust(iconEl);
+      var checkEl = card.querySelector('.task-check');
+      if (checkEl) {
+        checkEl.classList.add('done-flash');
+        leafGust(checkEl);
       }
+      if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
       setTimeout(proceed, 320);
     } else {
       proceed();
@@ -1462,7 +1511,11 @@
     }
     function onFailure(err) {
       busy[id] = false;
-      if (card) card.classList.remove('leaving');
+      if (card) {
+        card.classList.remove('leaving');
+        var chk = card.querySelector('.task-check');
+        if (chk) chk.classList.remove('done-flash');
+      }
       toast('⚠️ ' + err.message);
     }
 
@@ -1528,15 +1581,15 @@
     var metaParts = [t.category, t.oneOff ? 'einmalig' : t.interval + (t.interval === 1 ? ' Tag' : ' Tage')];
     if (t.assignee) metaParts.push(t.assignee);
     var pauseBtn = t.oneOff ? '' : paused
-      ? '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', false)" title="Fortsetzen">▶️</button>'
-      : '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', true)" title="Pausieren">⏸️</button>';
+      ? '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', false)" title="Fortsetzen" aria-label="Fortsetzen">' + ic('play') + '</button>'
+      : '<button class="dm-btn" onclick="setTaskPaused(\'' + t.id + '\', true)" title="Pausieren" aria-label="Pausieren">' + ic('pause') + '</button>';
     return '<div class="dish-manage-row' + (paused ? ' is-paused' : '') + '">' +
       '<span class="dm-icon">' + esc(t.icon) + '</span>' +
       '<span class="dm-name">' + esc(t.name) + '</span>' +
       '<div class="dm-actions">' +
-        '<button class="dm-btn" onclick="openEditTaskModal(\'' + t.id + '\')" title="Bearbeiten">✏️</button>' +
+        '<button class="dm-btn" onclick="openEditTaskModal(\'' + t.id + '\')" title="Bearbeiten" aria-label="Bearbeiten">' + ic('pencil') + '</button>' +
         pauseBtn +
-        '<button class="dm-btn danger" onclick="deleteTask(\'' + t.id + '\')" title="Löschen">🗑️</button>' +
+        '<button class="dm-btn danger" onclick="deleteTask(\'' + t.id + '\')" title="Löschen" aria-label="Löschen">' + ic('trash') + '</button>' +
       '</div>' +
       '<div class="dm-meta">' + esc(metaParts.join(' · ')) + '</div>' +
     '</div>';
@@ -1658,10 +1711,28 @@
     var dd = String(d.getDate()).padStart(2, '0');
     return d.getFullYear() + '-' + mm + '-' + dd;
   }
+  /* ---------- Aktionsmenü einer Aufgabe ---------- */
+  var actionsTaskId = null;
+  function openTaskActions(id) {
+    var t = findTask(id);
+    if (!t) return;
+    actionsTaskId = id;
+    document.getElementById('taskActionsTitle').textContent = t.icon + ' ' + t.name;
+    document.getElementById('taskActionsModalBack').classList.add('open');
+  }
+  function closeTaskActions() {
+    document.getElementById('taskActionsModalBack').classList.remove('open');
+  }
+  function runTaskAction(fn) {
+    var id = actionsTaskId;
+    closeTaskActions();
+    if (id) fn(id);
+  }
+
   function openRetroModal(id) {
     currentRetroTaskId = id;
     var t = DATA.tasks.filter(function(x) { return x.id === id; })[0];
-    document.getElementById('retroTitle').textContent = '🕓 Rückwirkend erledigt' + (t ? ': ' + t.name : '');
+    document.getElementById('retroTitle').textContent = 'Rückwirkend erledigt' + (t ? ': ' + t.name : '');
     var yesterday = addDaysClient_(DATA.today, -1);
     var weekAgo = addDaysClient_(DATA.today, -7);
     var dInput = document.getElementById('retroDate');
@@ -1788,18 +1859,18 @@
     document.getElementById('shopCount').textContent = items.length;
     var html = items.map(function(it, i) {
       var delay = Math.min(i, 8) * 0.04;
-      var tags = (it.aktion ? '<span class="shop-tag aktion" title="Aktion">🏷️</span>' : '') +
-        (it.tk ? '<span class="shop-tag tk" title="TK">❄️</span>' : '') +
-        (it.drogerie ? '<span class="shop-tag drogerie" title="Drogerie">🧴</span>' : '');
+      var tags = (it.aktion ? '<span class="shop-tag aktion" title="Aktion">' + ic('tag') + '</span>' : '') +
+        (it.tk ? '<span class="shop-tag tk" title="TK">' + ic('snow') + '</span>' : '') +
+        (it.drogerie ? '<span class="shop-tag drogerie" title="Drogerie">' + ic('drop') + '</span>' : '');
       return '<div class="shop-item' + (it.checked ? ' checked' : '') + '" data-id="' + it.id + '" style="--d:' + delay + 's">' +
         '<span class="shop-drag" aria-hidden="true"></span>' +
         '<button class="shop-check" onclick="toggleShopItem(\'' + it.id + '\')" aria-label="Erledigt">' +
-          (it.checked ? '✓' : '') +
+          ic('check') +
         '</button>' +
         '<div class="shop-name">' + esc(it.name) + tags + '</div>' +
         '<div class="dm-actions">' +
-          '<button class="dm-btn" onclick="startEditShop(\'' + it.id + '\')" title="Bearbeiten">✏️</button>' +
-          '<button class="dm-btn danger" onclick="deleteShopItem(\'' + it.id + '\')" title="Löschen">🗑️</button>' +
+          '<button class="dm-btn" onclick="startEditShop(\'' + it.id + '\')" title="Bearbeiten" aria-label="Bearbeiten">' + ic('pencil') + '</button>' +
+          '<button class="dm-btn danger" onclick="deleteShopItem(\'' + it.id + '\')" title="Löschen" aria-label="Löschen">' + ic('trash') + '</button>' +
         '</div></div>';
     }).join('');
     host.innerHTML = html || '<div class="empty"><div class="big">🛒</div>Einkaufsliste ist leer.</div>';
@@ -1827,7 +1898,7 @@
     document.getElementById('tagAktionBtn').classList.remove('sel');
     document.getElementById('tagTkBtn').classList.remove('sel');
     document.getElementById('tagDrogerieBtn').classList.remove('sel');
-    document.getElementById('shopAddBtn').textContent = '+';
+    document.getElementById('shopAddBtn').innerHTML = ic('plus');
     document.getElementById('shopCancelEditBtn').hidden = true;
   }
 
@@ -1842,7 +1913,7 @@
     document.getElementById('tagAktionBtn').classList.toggle('sel', pendingAktion);
     document.getElementById('tagTkBtn').classList.toggle('sel', pendingTk);
     document.getElementById('tagDrogerieBtn').classList.toggle('sel', pendingDrogerie);
-    document.getElementById('shopAddBtn').textContent = '✓';
+    document.getElementById('shopAddBtn').innerHTML = ic('check');
     document.getElementById('shopCancelEditBtn').hidden = false;
     document.getElementById('shopInput').focus();
   }
@@ -2097,6 +2168,14 @@
   document.getElementById('ooSave').addEventListener('click', saveOneOffTask);
   document.getElementById('oneoffModalBack').addEventListener('click', function(e) {
     if (e.target === this) closeOneOffModal();
+  });
+  document.getElementById('actPostpone').addEventListener('click', function() { runTaskAction(function(id) { doAction(id, 'postpone'); }); });
+  document.getElementById('actSkip').addEventListener('click', function() { runTaskAction(function(id) { doAction(id, 'skip'); }); });
+  document.getElementById('actRetro').addEventListener('click', function() { runTaskAction(openRetroModal); });
+  document.getElementById('actEdit').addEventListener('click', function() { runTaskAction(openEditTaskModal); });
+  document.getElementById('taskActionsCancel').addEventListener('click', closeTaskActions);
+  document.getElementById('taskActionsModalBack').addEventListener('click', function(e) {
+    if (e.target === this) closeTaskActions();
   });
   document.getElementById('retroCancel').addEventListener('click', closeRetroModal);
   document.getElementById('retroSave').addEventListener('click', saveRetro);
