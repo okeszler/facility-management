@@ -1114,12 +1114,11 @@
     }
     document.getElementById('sections').innerHTML = html;
 
-    // Fortschrittsring: erledigt = ursprünglich heute fällig minus noch offen
+    // Fortschrittsring: heute erledigt (vom Server, aus dem Log) im Verhältnis zu
+    // erledigt + noch offen. Übersteht so Neuladen, App-Neustart und andere Geräte.
     var open = overdue.length + today.length;
-    var total = Math.max(open, Number(sessionStorage.getItem('pp_total') || 0));
-    if (open > total) total = open;
-    sessionStorage.setItem('pp_total', total);
-    var doneCount = total - open;
+    var doneCount = (DATA.stats && DATA.stats.todayDone) || 0;
+    var total = doneCount + open;
     var pct = total === 0 ? 100 : Math.round(doneCount / total * 100);
     var bar = document.getElementById('ringBar');
     bar.setAttribute('stroke-dasharray', CIRC);
@@ -1641,7 +1640,6 @@
   }
   function afterTaskListChange(data, msg) {
     DATA = data;
-    sessionStorage.setItem('pp_total', 0);
     suppressNextConfetti = true;
     render();
     renderTaskManageList();
@@ -1722,7 +1720,6 @@
     callApi('/api/add-task', obj)
       .then(function(data) {
         DATA = data;
-        sessionStorage.setItem('pp_total', 0);
         render();
         closeOneOffModal();
         document.getElementById('ooName').value = '';
@@ -1818,7 +1815,6 @@
     callApi(endpoint, obj)
       .then(function(data) {
         DATA = data;
-        if (!isEdit) sessionStorage.setItem('pp_total', 0); // Zähler neu kalibrieren
         render();
         closeModal();
         document.getElementById('fName').value = '';
@@ -2264,7 +2260,6 @@
 
   try { currentUser = localStorage.getItem('pp_user'); } catch (e) {}
   var urlUser = getUserParam();
-  sessionStorage.setItem('pp_total', 0);
   callApi('/api/data')
     .then(function(data) {
       DATA = data;
@@ -2296,7 +2291,7 @@
     flushShopQueue();
     callApi('/api/data')
       .then(function(data) {
-        if (data.today !== DATA.today) { sessionStorage.setItem('pp_total', 0); prevOpen = null; }
+        if (data.today !== DATA.today) prevOpen = null;
         DATA = data;
         suppressNextConfetti = true;
         render();

@@ -57,6 +57,8 @@ export async function computeStats(db) {
   const todayCounts = {};
   const weekCounts = {};
   const daysWithActivity = {};
+  // Alle heute erledigten Aufgaben (egal von wem) – Basis für den Fortschrittsring.
+  let todayDone = 0;
 
   for (const r of results) {
     const action = String(r.action || '');
@@ -67,6 +69,7 @@ export async function computeStats(db) {
     const day = viennaDate.format(when);
     const user = String(r.user || '');
     daysWithActivity[day] = true;
+    if (day === today) todayDone++;
     if (day === today && user) todayCounts[user] = (todayCounts[user] || 0) + 1;
     if (day >= wStart && day <= today && user) weekCounts[user] = (weekCounts[user] || 0) + 1;
   }
@@ -78,7 +81,7 @@ export async function computeStats(db) {
     cursor = addDays(cursor, -1);
   }
 
-  return { todayCounts, weekCounts, streak };
+  return { todayCounts, weekCounts, streak, todayDone };
 }
 
 /** Botschaften NUR für eine bestimmte Person (Groß-/Kleinschreibung egal). Nie alle auf einmal. */
