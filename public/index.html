@@ -144,18 +144,31 @@
 
   /* ---------- Nutzer-Auswahl ---------- */
   .whoami { position: relative; z-index: 1; display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-  /* Flach: Abzeichen steht neben dem Namen statt darunter. */
+  /* Name mit Monogramm in der Personenfarbe (--mc) statt Emoji.
+     Aktiv: Monogramm gefüllt, Rand in Personenfarbe. Inaktiv: nur Kontur, gedämpft. */
   .who-chip {
-    position: relative; display: inline-flex; align-items: center; gap: 8px;
+    position: relative; display: inline-flex; align-items: center; gap: 9px;
     border: 1.5px solid var(--line); background: rgba(45,37,27,.85); border-radius: 999px;
-    padding: 5px 14px; font-weight: 700; font-size: 14.5px; line-height: 1.2;
-    color: var(--ink); cursor: pointer; min-height: 36px;
+    padding: 3px 15px 3px 3px; font-weight: 600; font-size: 15px; line-height: 1.2;
+    color: var(--muted); cursor: pointer; min-height: 38px;
     transition: transform .3s var(--bounce), background .25s ease, border-color .25s ease, color .25s ease;
   }
-  .who-chip.active { color: var(--on-accent); border-color: transparent; }
-  .who-chip.pop { animation: chip-pop .45s var(--bounce); }
+  .who-mono {
+    width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--mc); color: var(--mc); background: transparent;
+    font-size: 14px; font-weight: 800; font-variation-settings: 'wdth' 80; letter-spacing: .02em;
+    transition: background .25s ease, color .25s ease;
+  }
+  .who-chip.active {
+    color: var(--ink); font-weight: 700;
+    border-color: color-mix(in srgb, var(--mc) 60%, transparent);
+    background: color-mix(in srgb, var(--mc) 14%, var(--card));
+  }
+  .who-chip.active .who-mono { background: var(--mc); color: var(--on-accent); }
+  .who-chip.pop { animation: chip-pop .4s var(--ease-out); }
   @keyframes chip-pop {
-    50% { transform: scale(1.1) rotate(-2deg); }
+    50% { transform: scale(1.04); }
   }
 
   /* ---------- Ansichts-Umschalter ---------- */
@@ -1204,9 +1217,9 @@
     DATA.members.forEach(function(m) {
       if (HIDDEN_MEMBER_BUTTONS.indexOf(m.name) !== -1) return;
       var act = currentUser === m.name;
-      html += '<button class="who-chip' + (act ? ' active' : '') + '"' +
-        (act ? ' style="background:' + memberColor(m.name) + '"' : '') +
-        ' onclick="setUser(\'' + esc(m.name) + '\')">' + esc(m.emoji) + ' ' + esc(m.name) +
+      html += '<button class="who-chip' + (act ? ' active' : '') + '" style="--mc:' + memberColor(m.name) + '"' +
+        ' aria-pressed="' + act + '" onclick="setUser(\'' + esc(m.name) + '\')">' +
+        '<span class="who-mono" aria-hidden="true">' + esc(m.name.charAt(0).toUpperCase()) + '</span>' + esc(m.name) +
         '</button>';
     });
     el.innerHTML = html;
