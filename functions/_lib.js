@@ -50,7 +50,7 @@ export async function computeStats(db) {
   const wStart = weekStart(today);
   // Der log-Table wächst mit jeder Aktion – nur ein begrenztes Fenster lesen.
   const { results } = await db
-    .prepare('SELECT ts, action, user FROM log WHERE ts >= ?1')
+    .prepare('SELECT ts, action, user, task_name FROM log WHERE ts >= ?1')
     .bind(addDays(today, -400))
     .all();
 
@@ -59,6 +59,8 @@ export async function computeStats(db) {
   const daysWithActivity = {};
   // Alle heute erledigten Aufgaben (egal von wem) – Basis für den Fortschrittsring.
   let todayDone = 0;
+  // Was diese Woche insgesamt erledigt wurde (Aufgabenname -> Anzahl) – für den Wochenrückblick.
+  const weekTasks = {};
 
   for (const r of results) {
     const action = String(r.action || '');
@@ -72,6 +74,10 @@ export async function computeStats(db) {
     if (day === today) todayDone++;
     if (day === today && user) todayCounts[user] = (todayCounts[user] || 0) + 1;
     if (day >= wStart && day <= today && user) weekCounts[user] = (weekCounts[user] || 0) + 1;
+    if (day >= wStart && day <= today) {
+      const name = String(r.task_name || '').trim() || 'Sonstiges';
+      weekTasks[name] = (weekTasks[name] || 0) + 1;
+    }
   }
 
   let cursor = daysWithActivity[today] ? today : addDays(today, -1);
@@ -81,7 +87,7 @@ export async function computeStats(db) {
     cursor = addDays(cursor, -1);
   }
 
-  return { todayCounts, weekCounts, streak, todayDone };
+  return { todayCounts, weekCounts, streak, todayDone, weekTasks };
 }
 
 /** Botschaften NUR für eine bestimmte Person (Groß-/Kleinschreibung egal). Nie alle auf einmal. */

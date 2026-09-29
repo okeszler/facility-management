@@ -157,8 +157,6 @@
   @keyframes chip-pop {
     50% { transform: scale(1.1) rotate(-2deg); }
   }
-  .who-badge { font-size: 12px; font-weight: 600; color: var(--muted); }
-  .who-chip.active .who-badge { color: rgba(36,26,15,.75); }
 
   /* ---------- Ansichts-Umschalter ---------- */
   .view-switch {
@@ -417,9 +415,8 @@
     width: 30px; height: 30px; border-radius: 10px; cursor: pointer; font-size: 13px;
   }
   .recap-msg { font-size: 15.5px; line-height: 1.45; margin-bottom: 10px; font-weight: 500; }
-  .recap-row {
-    display: flex; justify-content: space-between; font-size: 15px; font-weight: 600;
-    padding: 6px 0; border-top: 1px solid rgba(36,26,15,.18); font-variant-numeric: tabular-nums;
+  .recap-text {
+    font-size: 15px; line-height: 1.5; padding-top: 10px; border-top: 1px solid rgba(36,26,15,.18);
   }
 
   /* ---------- Speiseplan ---------- */
@@ -921,14 +918,6 @@
     return text.replace('{name}', taskName);
   }
 
-  function weekBadge(count) {
-    if (count >= 20) return '🏆 Legende';
-    if (count >= 12) return '🥷 Putz-Ninja';
-    if (count >= 6) return '😈 Putzteufel';
-    if (count >= 3) return '🐝 Fleißig';
-    return '';
-  }
-
   /* ---------- Herbstlaub ---------- */
   var LEAF_SHAPES = ['leaf-maple', 'leaf-beech', 'leaf-oak'];
   var LEAF_COLORS = ['#E8913A', '#D9553A', '#E9BC4C', '#C0702E', '#9DB35A', '#B8452F'];
@@ -959,7 +948,7 @@
     if (!sky || REDUCED_MOTION) return;
     var html = '';
     for (var i = 0; i < 9; i++) {
-      var dur = rnd(22, 38);
+      var dur = rnd(44, 76);
       html += '<span class="leaf-fall" style="--x:' + ((i + rnd(.1, .9)) / 9 * 100).toFixed(1) + '%;' +
         '--dur:' + dur.toFixed(1) + 's;--delay:' + (-rnd(0, dur)).toFixed(1) + 's;">' +
         '<span class="leaf-sway" style="--size:' + Math.round(rnd(80, 144)) + 'px;--c:' + pick(LEAF_COLORS) + ';' +
@@ -1151,7 +1140,7 @@
     '🌟 Gemeinsam alles im Griff – diese Woche {n} Aufgaben geschafft! 💪',
     '🏡 Als Team richtig was bewegt: {n} Aufgaben diese Woche erledigt. Stark!',
     '✨ {n} Aufgaben, ein Team. Gut gemacht, alle miteinander!',
-    '💜 Diese Woche zusammen {n} Aufgaben geschafft – so hält man ein Zuhause am Laufen.'
+    '🍂 Diese Woche zusammen {n} Aufgaben geschafft – so hält man ein Zuhause am Laufen.'
   ];
 
   function renderWeeklyRecap() {
@@ -1160,14 +1149,8 @@
     var d = new Date(+p[0], +p[1] - 1, +p[2]);
     var isSunday = d.getDay() === 0;
     var dismissed = sessionStorage.getItem('pp_recap_dismissed') === DATA.today;
-    var weekCounts = (DATA.stats && DATA.stats.weekCounts) || {};
-
-    var total = 0;
-    var entries = DATA.members.map(function(m) {
-      var c = weekCounts[m.name] || 0;
-      total += c;
-      return { name: m.name, count: c };
-    });
+    var weekTasks = (DATA.stats && DATA.stats.weekTasks) || {};
+    var total = Object.keys(weekTasks).reduce(function(sum, k) { return sum + weekTasks[k]; }, 0);
 
     if (!isSunday || dismissed || total === 0) {
       el.style.display = 'none';
@@ -1177,14 +1160,37 @@
     var template = TEAM_LINES[Math.floor(Math.random() * TEAM_LINES.length)];
     var msg = template.replace('{n}', total);
 
-    var rows = entries.map(function(e) {
-      return '<div class="recap-row"><span>' + esc(e.name) + '</span><span>' + e.count + '</span></div>';
-    }).join('');
-
     el.innerHTML =
       '<div class="recap-head">🌟 Wochenrückblick<button class="recap-close" onclick="dismissRecap()" aria-label="Schließen">' + ic('x') + '</button></div>' +
-      '<div class="recap-msg">' + esc(msg) + '</div>' + rows;
+      '<div class="recap-msg">' + esc(msg) + '</div>' +
+      '<div class="recap-text">' + esc(weekSummaryText(weekTasks)) + '</div>';
     el.style.display = 'block';
+  }
+
+  /** Gesamtrückblick als Fließtext – bewusst ohne "wer hat wie viel". */
+  function joinDe(parts) {
+    if (parts.length <= 1) return parts.join('');
+    return parts.slice(0, -1).join(', ') + ' und ' + parts[parts.length - 1];
+  }
+  function weekSummaryText(weekTasks) {
+    var list = Object.keys(weekTasks).map(function(name) { return { name: name, n: weekTasks[name] }; })
+      .sort(function(a, b) { return b.n - a.n || a.name.localeCompare(b.name, 'de'); });
+    var often = list.filter(function(x) { return x.n > 1; });
+    var once = list.filter(function(x) { return x.n === 1; });
+    var sentences = [];
+    if (often.length) {
+      var top = often.slice(0, 4).map(function(x) { return x.name + ' (' + x.n + '×)'; });
+      var restOften = often.length - top.length;
+      if (restOften > 0) top.push(restOften + (restOften === 1 ? ' weitere Routine' : ' weitere Routinen'));
+      sentences.push('Immer wieder dran waren ' + joinDe(top) + '.');
+    }
+    if (once.length) {
+      var shown = once.slice(0, 3).map(function(x) { return x.name; });
+      var restOnce = once.length - shown.length;
+      if (restOnce > 0) shown.push(restOnce + ' weitere Dinge');
+      sentences.push((often.length ? 'Außerdem erledigt: ' : 'Erledigt wurden: ') + joinDe(shown) + '.');
+    }
+    return sentences.join(' ');
   }
 
   function dismissRecap() {
@@ -1195,15 +1201,12 @@
   function renderWho() {
     var el = document.getElementById('whoami');
     var html = '';
-    var weekCounts = (DATA.stats && DATA.stats.weekCounts) || {};
     DATA.members.forEach(function(m) {
       if (HIDDEN_MEMBER_BUTTONS.indexOf(m.name) !== -1) return;
       var act = currentUser === m.name;
-      var badge = weekBadge(weekCounts[m.name] || 0);
       html += '<button class="who-chip' + (act ? ' active' : '') + '"' +
         (act ? ' style="background:' + memberColor(m.name) + '"' : '') +
         ' onclick="setUser(\'' + esc(m.name) + '\')">' + esc(m.emoji) + ' ' + esc(m.name) +
-        (badge ? '<span class="who-badge">' + badge + '</span>' : '') +
         '</button>';
     });
     el.innerHTML = html;
